@@ -11,10 +11,15 @@ def alignImages(im1, im2):
     im1Gray = cv.cvtColor(im1, cv.COLOR_BGR2GRAY)
     im2Gray = cv.cvtColor(im2, cv.COLOR_BGR2GRAY)
 
+    # Detect AKAZE featyres and compute descriptors
+    akaze = cv.AKAZE_create()
+    keypoints1, descriptors1 = akaze.detectAndCompute(im1Gray, None)
+    keypoints2, descriptors2 = akaze.detectAndCompute(im2Gray, None)
+
     # Detect ORB features and compute descriptors.
-    sift = cv.xfeatures2d.SIFT_create(MAX_MATCHES)
-    keypoints1, descriptors1 = sift.detectAndCompute(im1Gray, None)
-    keypoints2, descriptors2 = sift.detectAndCompute(im2Gray, None)
+    # sift = cv.xfeatures2d.SIFT_create(MAX_MATCHES)
+    # keypoints1, descriptors1 = sift.detectAndCompute(im1Gray, None)
+    # keypoints2, descriptors2 = sift.detectAndCompute(im2Gray, None)
 
     # orb = cv.ORB_create(MAX_MATCHES)
     # keypoints1, descriptors1 = orb.detectAndCompute(im1Gray, None)
@@ -58,11 +63,12 @@ def alignImages(im1, im2):
 
     return im1Reg, h
 
+
 ######################################################################################
 
-cap = cv.VideoCapture(0) # 0 - fol camera default | aceasta imagine va fi aliniata
+cap = cv.VideoCapture(0)  # 0 - fol camera default | aceasta imagine va fi aliniata
 
-refFilename = "template.jpg" # imagine dupa care va fi aliniata imagine camerei
+refFilename = "resources/template.jpg"  # imagine dupa care va fi aliniata imagine camerei
 imRef = cv.imread(refFilename, cv.IMREAD_COLOR)
 
 # verific daca camera s-a deschis cu succes
@@ -77,7 +83,7 @@ while True:
     fps += 1
     success, camera = cap.read()
     cv.imshow("video", camera)
-    
+
     imReg, h = alignImages(camera, imRef)
     cv.imshow("img aliniata", imReg)
 
@@ -87,7 +93,7 @@ while True:
     # verific daca space-ul este apasat pentru a detecta configuratia tablei
     if key == 32:
         # Save the captured frame as a screenshot
-        cv.imwrite("screenshot.jpg", imReg)
+        cv.imwrite("resources/screenshot.jpg", imReg)
         print("Screenshot saved.")
 
     # verific daca q-ul este apasat pentru a iesi din loop
