@@ -56,8 +56,8 @@ class StareJoc:
         return self.afisare_tabla()
 
     def reset(self):
-        # self.piese_tabla = np.zeros(24)  # zero inseamna ca nu este piesa
-        self.piese_tabla = np.random.choice([-1, 0, 1], size=24)  # date de test random
+        self.piese_tabla = np.zeros(24)  # zero inseamna ca nu este piesa
+        # self.piese_tabla = np.random.choice([-1, 0, 1], size=24)  # date de test random
         self.JMIN_num_piese = 9  # numarul de piese al jucatorului
         self.JMAX_num_piese = 9
 
@@ -144,10 +144,10 @@ class StareJoc:
                                        center=[x * self.scala_imaginii for x in centrul_pozitiei],
                                        radius=self.raza_piesa)
 
-    def trage_linie(self, start, end, culoare_linii=(0, 0, 0), scala_imaginii=50, grosimea_liniei=8):
+    def trage_linie(self, start, end, culoare_linii=(0, 0, 0), grosimea_liniei=8):
         pygame.draw.line(surface=self.window, color=culoare_linii,
-                         start_pos=[x * scala_imaginii for x in start],
-                         end_pos=[x * scala_imaginii for x in end],
+                         start_pos=[x * self.scala_imaginii for x in start],
+                         end_pos=[x * self.scala_imaginii for x in end],
                          width=grosimea_liniei)
 
     def afisare_tabla(self):
@@ -333,8 +333,8 @@ class StareJoc:
             dx = x_click_aux - (x * self.scala_imaginii)
             dy = y_click_aux - (y * self.scala_imaginii)
             dist = math.pow(dx, 2) + math.pow(dy, 2)
-            if dist <= math.pow(self.raza_piesa,
-                                2):  # x^2 + y^2 <= r^2->punctele de coord x,y care satisfac <= r^2 sunt in cerc
+            # x^2 + y^2 <= r^2->punctele de coord x,y care satisfac <= r^2 sunt in cerc
+            if dist <= math.pow(self.raza_piesa, 2):
                 # print("click in piesa: ", index + 1) # debug
                 return index
         return -1
@@ -381,11 +381,15 @@ class StareJoc:
             print(f"Pozitia {index_pos} este ocupata")
             return self.pune_piesa(jucator)
         else:
-            self.piese_tabla[index_pos] = jucator * (-1)
+            self.piese_tabla[index_pos] = jucator
+            print("Piesa a fost pusa cu succes") # debug
+
+            # verificam daca piesa pusa formeaza o moara
+            if self.check_moara(index_pos, jucator):
+                print("Piesa formeaza o moara")
+                self.sterge_piesa(jucator * (-1))
 
     def muta_piesa(self, jucator, get_start=True, index_pos_start=-1):
-        # primim jucatorul care vrea sa faca miscarea
-
         # selectam piesa pe care vrem sa o mutam
         if get_start:
             index_pos_start = self.get_pos_tabla_from_click()
@@ -425,8 +429,107 @@ class StareJoc:
             self.piese_tabla[index_pos_mutare] = jucator
 
             print("Piesa a fost mutata")
+            # verificam daca piesa mutata formeaza o moara
+            if self.check_moara(index_pos_mutare, jucator):
+                print("Piesa formeaza o moara")
+                self.sterge_piesa(jucator * (-1))
 
-    # TODO: mori + 2 player game
-    # - dupa fiecare piesa pusa/mutata sa fie verificat daca aceasta se afla intr-o moara
-    # daca se afla, sa fie selectata piesa pe care sa o elimine
-    # - in human_vs_human sa fie implementat 2 player game
+    def sterge_piesa(self, inamic):
+        print("Alegeti piesa inamicului pe care vreti sa o stergeti")
+        index_pos = self.get_pos_tabla_from_click()
+
+        if index_pos == -1:
+            print("Pozitia nu a fost gasita")
+            return self.sterge_piesa(inamic)
+        elif self.piese_tabla[index_pos] != inamic:
+            print("Puteti sterge doar piesele inamicului")
+            return self.sterge_piesa(inamic)
+        else:
+            print("Piesa a fost stearsa")
+            if inamic == self.JMIN:
+                self.JMIN_num_piese -= 1
+            else:
+                self.JMAX_num_piese -= 1
+            self.piese_tabla[index_pos] = 0
+
+    def check_moara(self, index_mutare, jucator):
+        # daca pe rand sau coloana sunt 3 piese alaturate
+
+        # linie
+        # verific daca piesa este in dreapta
+        if self.get_index_stanga(index_mutare) != -1 and self.piese_tabla[index_mutare - 1] == jucator and \
+                self.get_index_stanga(index_mutare - 1) != -1 and self.piese_tabla[index_mutare - 2] == jucator:
+            return True
+        # verific daca piesa este in centru
+        elif self.get_index_stanga(index_mutare) != -1 and self.piese_tabla[index_mutare - 1] == jucator and \
+                self.get_index_dreapta(index_mutare) != -1 and self.piese_tabla[index_mutare + 1] == jucator:
+            return True
+        # verific daca piesa este in stanga
+        elif self.get_index_dreapta(index_mutare) != -1 and self.piese_tabla[index_mutare + 1] == jucator and \
+                self.get_index_dreapta(index_mutare + 1) != -1 and self.piese_tabla[index_mutare + 2] == jucator:
+            return True
+        # coloana
+        # verific daca piesa este sus
+        elif self.get_index_jos(index_mutare) != -1 and \
+                self.piese_tabla[self.get_index_jos(index_mutare)] == jucator and \
+                self.get_index_jos(self.get_index_jos(index_mutare)) != -1 and \
+                self.piese_tabla[self.get_index_jos(self.get_index_jos(index_mutare))] == jucator:
+            return True
+        # verific daca piesa este in centru
+        elif self.get_index_sus(index_mutare) != -1 and \
+                self.piese_tabla[self.get_index_sus(index_mutare)] == jucator and \
+                self.get_index_jos(index_mutare) != -1 and \
+                self.piese_tabla[self.get_index_jos(index_mutare)] == jucator:
+            return True
+        # verific daca piesa este jos
+        elif self.get_index_sus(index_mutare) != -1 and \
+                self.piese_tabla[self.get_index_sus(index_mutare)] == jucator and \
+                self.get_index_sus(self.get_index_sus(index_mutare)) != -1 and \
+                self.piese_tabla[self.get_index_sus(self.get_index_sus(index_mutare))] == jucator:
+            return True
+        else:
+            return False
+
+    def check_castigator(self, jucator):
+        # pentru ca un jucator sa castige trebuie ca :
+        # celalalt jucator sa aiba mai putin de 2 piese
+        #                   SAU
+        # celalalt jucator sa nu mai poate faca nici o miscare
+
+        if jucator == self.JMIN and self.JMIN_num_piese < 3:
+            return True
+        if jucator == self.JMAX and self.JMAX_num_piese < 3:
+            return True
+
+        # print("============")
+        # for index, piese in enumerate(self.piese_tabla):
+        #     print(f"index = {index} -> piesa={piese}")
+        # print("============")
+
+        # daca inamicul poate are o mutare valabila, inseamna ca nu este castigator
+        for pos, piesa_jucator in enumerate(self.piese_tabla):
+            if piesa_jucator == jucator * (-1):
+                # daca toate 4 directiile sunt blocate => piesa blocata
+                counter = 0
+                poz_posibile = 4
+                if self.get_index_stanga(pos) == -1:
+                    poz_posibile -= 1
+                elif self.piese_tabla[self.get_index_stanga(pos)] != 0:
+                    counter += 1
+                if self.get_index_dreapta(pos) == -1:
+                    poz_posibile -= 1
+                elif self.piese_tabla[self.get_index_dreapta(pos)] != 0:
+                    counter += 1
+                if self.get_index_sus(pos) == -1:
+                    poz_posibile -= 1
+                elif self.piese_tabla[self.get_index_sus(pos)] != 0:
+                    counter += 1
+                if self.get_index_jos(pos) == -1:
+                    poz_posibile -= 1
+                elif self.piese_tabla[self.get_index_jos(pos)] != 0:
+                    counter += 1
+                # print(f"index {pos}, poz_pos {poz_posibile} -> counter {counter}")  # debug
+                if counter < poz_posibile:
+                    return False
+
+        return True

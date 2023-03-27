@@ -4,20 +4,45 @@ import board
 
 joc = board.StareJoc()
 end = False
-counter = 0
+
+# consideram ca player1 ( JMIN este cel care incepe )
+jucator = joc.JMIN
 try:
-    while not end:
+    # in prima faza a jocului, fiecare jucator isi pozitioneaza cele 9 piese
+    print("Jucatorii trebuie sa isi plaseze piesele pe tabla")
+    for i in range(18):
         print()
-        print('-------- 1st PLAYER TURN --------')
-        # print(str(joc))
-        # joc.pune_piesa(joc.JMIN)
+        if jucator == joc.JMIN:
+            print('-------- 1st PLAYER TURN --------')
+            # print(str(joc))
+            joc.pune_piesa(jucator)
+            jucator *= -1
+        elif jucator == joc.JMAX:
+            print('-------- 2st PLAYER TURN --------')
+            # print(str(joc))
+            joc.pune_piesa(jucator)
+            jucator *= -1
 
-        counter += 1
+    print("Jucatorii trebuie sa isi mute piesele pe tabla")
+    # in a doua faza a jocului, cei doi jucatori muta piesele pana cand unul dintre ei castiga
+    while not joc.check_castigator(jucator):
+        print()
+        if jucator == joc.JMIN:
+            print('-------- 1st PLAYER TURN --------')
+            # print(str(joc))
+            joc.muta_piesa(jucator)
+            jucator *= -1
+        elif jucator == joc.JMAX:
+            print('-------- 2st PLAYER TURN --------')
+            # print(str(joc))
+            joc.muta_piesa(jucator)
+            jucator *= -1
 
-        joc.muta_piesa(joc.JMIN)
+    if jucator == joc.JMIN:
+        print('--------- 1st PLAYER WON ------------')
+    else:
+        print('--------- 2st PLAYER WON ------------')
 
-        if counter > 10:
-            end = True
 except KeyboardInterrupt:
     print("human_vs_human interrupted")
     pygame.quit()
