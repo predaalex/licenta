@@ -1,14 +1,11 @@
 import math
 import sys
-import time
 
 import numpy as np
 import pygame
 from threading import Thread
 from threading import Event
-from time import sleep
 
-GUI = True
 x_click = 0
 y_click = 0
 click_event = Event()
@@ -35,8 +32,8 @@ coord_arr = np.array([(1, 1), (7, 1), (13, 1),
 
 
 class StareJoc:
-    def __init__(self):
-        global GUI
+    def __init__(self, tabla=None, GUI=True, parinte=None):
+        self.estimare = None
         self.raza_piesa = None
         self.culoare_jucator2 = None
         self.culoare_jucator1 = None
@@ -48,15 +45,19 @@ class StareJoc:
         self.JMAX = 1
         self.window = None
         self.clock = None
-        self.reset()
+        self.parinte = parinte
+        self.reset(tabla)
         if GUI:
             self.init_GUI()
 
     def __str__(self):
         return self.afisare_tabla()
 
-    def reset(self):
-        self.piese_tabla = np.zeros(24)  # zero inseamna ca nu este piesa
+    def reset(self, tabla):
+        if tabla is None:
+            self.piese_tabla = np.zeros(24)  # zero inseamna ca nu este piesa
+        else:
+            self.piese_tabla = tabla
         # self.piese_tabla = np.random.choice([-1, 0, 1], size=24)  # date de test random
         self.JMIN_num_piese = 9  # numarul de piese al jucatorului
         self.JMAX_num_piese = 9
@@ -505,10 +506,11 @@ class StareJoc:
         # for index, piese in enumerate(self.piese_tabla):
         #     print(f"index = {index} -> piesa={piese}")
         # print("============")
-
+        numar_piese = 0
         # daca inamicul poate are o mutare valabila, inseamna ca nu este castigator
         for pos, piesa_jucator in enumerate(self.piese_tabla):
             if piesa_jucator == jucator * (-1):
+                numar_piese = 0
                 # daca toate 4 directiile sunt blocate => piesa blocata
                 counter = 0
                 poz_posibile = 4
@@ -531,5 +533,23 @@ class StareJoc:
                 # print(f"index {pos}, poz_pos {poz_posibile} -> counter {counter}")  # debug
                 if counter < poz_posibile:
                     return False
+        if numar_piese == 0:
+            return False
+        else:
+            return True
 
-        return True
+    def mutari_libere(self):
+        pozitii_libere = []
+        for index, valoare in enumerate(self.piese_tabla):
+            if valoare == 0:
+                pozitii_libere.append(index)
+        return pozitii_libere
+
+    def estimare_scor(self, depth, jucator):
+        # numarul de mori formate
+        scor = 0
+        for index, valoare in enumerate(self.piese_tabla):
+            if valoare == jucator:
+                if self.check_moara(index, jucator):
+                    scor += 1
+        return scor
