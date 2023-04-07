@@ -28,21 +28,19 @@ try:
             while urmatoarea_stare.parinte is not None:
                 urmatoarea_stare = urmatoarea_stare.parinte
             urmatoarea_stare.estimare = urmatoarea_stare.estimare_scor(0, joc.JMAX) - urmatoarea_stare.estimare_scor(0, joc.JMIN)
-            # print(urmatoarea_stare.piese_tabla) DEBUG
-            # print(urmatoarea_stare.estimare) DEBUG
+            # print(urmatoarea_stare.piese_tabla) # DEBUG
+            # print(urmatoarea_stare.estimare) # DEBUG
 
             # calculez scorul starii actuale, iar daca acesta fluctueaza ( +-2/3 ) unul dintre jucatori face o moara
 
             joc.estimare = joc.estimare_scor(0, joc.JMAX) - joc.estimare_scor(0, joc.JMIN)
 
             # Daca ai-ul face o moara, sa elimine o piese a adversarului
-            if joc.estimare - urmatoarea_stare.estimare < 0:
-                print("ai-ul a facut o moara")
-                # TODO: de eliminat piesa adversarului
-                # piesa eliminata va fi in urmatoarea ordine:
-                # 1.daca sunt 2 piese aproape sa faca o moara
-                # 2.o piesa singuratica
-                # 3.o piesa random pentru ca toate piesele formeaza o moara
+            print(f"joc = {joc.estimare} urm_stare = {urmatoarea_stare.estimare}") # DEBUG
+            if urmatoarea_stare.estimare - joc.estimare > 0:
+                print("ai-ul a facut o moara")  # DEBUG
+
+                urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
             joc.piese_tabla = urmatoarea_stare.piese_tabla
             jucator *= -1

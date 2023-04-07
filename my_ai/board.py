@@ -356,12 +356,16 @@ class StareJoc:
             return -1
 
     def get_index_stanga(self, index):
+        if index == -1:
+            return -1
         if index % 3 == 0:
             return -1
         else:
             return index - 1
 
     def get_index_dreapta(self, index):
+        if index == -1:
+            return -1
         if index % 3 == 2:
             return -1
         else:
@@ -552,4 +556,5 @@ class StareJoc:
             if valoare == jucator:
                 if self.check_moara(index, jucator):
                     scor += 1
+        scor -= depth / 2
         return scor
