@@ -32,7 +32,7 @@ coord_arr = np.array([(1, 1), (7, 1), (13, 1),
 
 
 class StareJoc:
-    def __init__(self, tabla=None, GUI=True, parinte=None):
+    def __init__(self, tabla=None, GUI=True, parinte=None, index_move=None):
         self.estimare = None
         self.raza_piesa = None
         self.culoare_jucator2 = None
@@ -46,6 +46,7 @@ class StareJoc:
         self.window = None
         self.clock = None
         self.parinte = parinte
+        self.index_move = index_move
         self.reset(tabla)
         if GUI:
             self.init_GUI()
