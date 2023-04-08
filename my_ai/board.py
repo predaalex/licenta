@@ -330,7 +330,7 @@ class StareJoc:
         x_click = y_click = 0
         click_event.clear()
 
-        print(f"x = {x_click_aux} || y = {y_click_aux}")
+        # print(f"x = {x_click_aux} || y = {y_click_aux}")  # DEBUG
         for index, (x, y) in enumerate(coord_arr):
             dx = x_click_aux - (x * self.scala_imaginii)
             dy = y_click_aux - (y * self.scala_imaginii)
@@ -502,9 +502,9 @@ class StareJoc:
         #                   SAU
         # celalalt jucator sa nu mai poate faca nici o miscare
 
-        if jucator == self.JMIN and self.JMIN_num_piese < 3:
+        if jucator == self.JMIN and self.JMAX_num_piese < 3:
             return True
-        if jucator == self.JMAX and self.JMAX_num_piese < 3:
+        if jucator == self.JMAX and self.JMIN_num_piese < 3:
             return True
 
         # print("============")
