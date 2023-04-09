@@ -164,20 +164,20 @@ def vecinatati_libere(stare_joc, index):
     index_piesa_sus = stare_joc.get_index_sus(index)
     index_piesa_jos = stare_joc.get_index_jos(index)
 
-    vecinatati_libere = []
+    vecini = []
 
     if index_piesa_stanga != -1 and stare_joc.piese_tabla[index_piesa_stanga] == 0:
-        vecinatati_libere.append(index_piesa_stanga)
+        vecini.append(index_piesa_stanga)
     if index_piesa_dreapta != -1 and stare_joc.piese_tabla[index_piesa_dreapta] == 0:
-        vecinatati_libere.append(index_piesa_dreapta)
+        vecini.append(index_piesa_dreapta)
     if index_piesa_sus != -1 and stare_joc.piese_tabla[index_piesa_sus] == 0:
-        vecinatati_libere.append(index_piesa_sus)
+        vecini.append(index_piesa_sus)
     if index_piesa_jos != -1 and stare_joc.piese_tabla[index_piesa_jos] == 0:
-        vecinatati_libere.append(index_piesa_jos)
+        vecini.append(index_piesa_jos)
 
     stare_joc.pozitii_valide_mutare(index)
 
-    return vecinatati_libere
+    return vecini
 
 
 def stari_posibile_muta_piese(stare_joc_parinte, jucator, depth):

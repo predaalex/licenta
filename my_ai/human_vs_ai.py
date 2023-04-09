@@ -27,6 +27,7 @@ try:
             # print(urmatoarea_stare) DEBUG
             while urmatoarea_stare.parinte is not None:
                 urmatoarea_stare = urmatoarea_stare.parinte
+            print("ai-ul a pus o piesa")
             urmatoarea_stare.estimare = urmatoarea_stare.estimare_scor(0, joc.JMAX) - \
                                         urmatoarea_stare.estimare_scor(0, joc.JMIN)
 
@@ -92,6 +93,7 @@ try:
                 urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
             joc.piese_tabla = urmatoarea_stare.piese_tabla
+            print("ai-ul a mutat o piesa")
             jmax_win = joc.check_castigator(joc.JMAX)
             print(f"jmax_win_check:{jmax_win}")  # DEBUG
             if jmax_win:
