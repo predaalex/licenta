@@ -1,13 +1,14 @@
 import copy
+import random
 
 import board
 
 
-def stari_posibile_pune_piese(stare_joc_parinte, jucator, depth):
+def stari_posibile_pune_piese(stare_joc_parinte, jucator, max_depth, depth):
     configuratii_posibile = []
     piese_tabla = stare_joc_parinte.piese_tabla
 
-    if depth == 3:
+    if depth == max_depth:
         stare_joc_parinte = None
 
     for index, valoare in enumerate(piese_tabla):
@@ -21,33 +22,43 @@ def stari_posibile_pune_piese(stare_joc_parinte, jucator, depth):
     return configuratii_posibile
 
 
-def min_max_pune_piese(stare_joc: board.StareJoc, jucator, depth=3):
+def min_max_pune_piese(stare_joc: board.StareJoc, jucator_initial, jucator, max_depth=3, depth=3):
     # configuratie_tabla_rezultata = np.random.choice([-1, 0, 1], size=24)  # date de test random
     # print(stare_joc.piese_tabla)
     # print(jucator)
     # print(stare_joc.check_castigator(jucator))
     # print(stare_joc.check_castigator(-jucator))
-    if depth <= 0 or stare_joc.check_castigator(jucator) or stare_joc.check_castigator(-jucator):
-        stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator) - stare_joc.estimare_scor(depth, jucator)
+    if depth <= 0:
+        if stare_joc.check_castigator(jucator):
+            stare_joc.estimare = 999
+        elif stare_joc.check_castigator(-jucator):
+            stare_joc.estimare = -999
+        else:
+            stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator) - stare_joc.estimare_scor(depth, jucator)
         # print(f"depth = {depth} "
         #       f"castigator = {stare_joc.check_castigator(jucator) or stare_joc.check_castigator(-jucator)} "
         #       f"scor = {stare_joc.estimare}")
         return stare_joc
 
-    stari = stari_posibile_pune_piese(stare_joc, jucator, depth)
+    stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
     # print(f"mutari posibile {len(stari)}\n")
 
-    mutari_cu_estimare = [min_max_pune_piese(stare, -jucator, depth - 1) for stare in stari]
+    mutari_cu_estimare = [min_max_pune_piese(stare, jucator_initial, -jucator, max_depth, depth - 1) for stare in stari]
     # for mutare in mutari_posibile:
     #     stare_nou = board.StareJoc()
     #     min_max_pune_piese()
 
     # print("AI MOVE")
-    if jucator == 1:
+    if jucator == jucator_initial:
         # daca jucatorul este JMAX aleg estimarea maxima
         best_move = max(mutari_cu_estimare, key=lambda x: x.estimare)
+        best_estimare = best_move.estimare
+        best_mutari = [mutare for mutare in mutari_cu_estimare if mutare.estimare == best_estimare]
+        best_move = random.choice(best_mutari)
     else:
-        best_move = min(mutari_cu_estimare, key=lambda x: x.estimare)
+        best_estimare = min(mutari_cu_estimare, key=lambda x: x.estimare).estimare
+        best_mutari = [mutare for mutare in mutari_cu_estimare if mutare.estimare == best_estimare]
+        best_move = random.choice(best_mutari)
     return best_move
 
 
@@ -180,11 +191,11 @@ def vecinatati_libere(stare_joc, index):
     return vecini
 
 
-def stari_posibile_muta_piese(stare_joc_parinte, jucator, depth):
+def stari_posibile_muta_piese(stare_joc_parinte, jucator, max_depth, depth):
     configuratii_posibile = []
     piese_tabla = stare_joc_parinte.piese_tabla
     aux_stare_joc_parinte = board.StareJoc(stare_joc_parinte.piese_tabla, False, None)
-    if depth == 3:
+    if depth == max_depth:
         stare_joc_parinte = None
 
     for index, valoare in enumerate(piese_tabla):
@@ -201,31 +212,45 @@ def stari_posibile_muta_piese(stare_joc_parinte, jucator, depth):
     return configuratii_posibile
 
 
-def min_max_muta_piese(stare_joc: board.StareJoc, jucator, depth=3):
+def min_max_muta_piese(stare_joc: board.StareJoc, jucator_initial, jucator, max_depth=3, depth=3):
     # print(stare_joc.piese_tabla)
     # print(jucator)
     # print(stare_joc.check_castigator(jucator))
     # print(stare_joc.check_castigator(-jucator))
-    if depth <= 0 or stare_joc.check_castigator(jucator) or stare_joc.check_castigator(-jucator):
-        stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator) - stare_joc.estimare_scor(depth, jucator)
+    if depth <= 0:
+        if stare_joc.check_castigator(jucator):
+            stare_joc.estimare = 999
+        elif stare_joc.check_castigator(-jucator):
+            stare_joc.estimare = -999
+        else:
+            stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator) - stare_joc.estimare_scor(depth, jucator)
         # print(f"depth = {depth} "
         #       f"castigator = {stare_joc.check_castigator(jucator) or stare_joc.check_castigator(-jucator)} "
         #       f"scor = {stare_joc.estimare}")
         return stare_joc
 
-    stari = stari_posibile_muta_piese(stare_joc, jucator, depth)
+    stari = stari_posibile_muta_piese(stare_joc, jucator, max_depth, depth)
     # print(f"mutari posibile {len(stari)}\n")
 
-    mutari_cu_estimare = [min_max_muta_piese(stare, -jucator, depth - 1) for stare in stari]
+    mutari_cu_estimare = [min_max_muta_piese(stare, jucator_initial, -jucator, max_depth, depth - 1) for stare in stari]
     # for mutare in mutari_posibile:
     #     stare_nou = board.StareJoc()
     #     min_max_pune_piese()
 
+    # print(len(mutari_cu_estimare))
+    if len(mutari_cu_estimare) == 0:
+        # print("end game") # DEBUG
+        stare_joc.estimare = 999
+        return stare_joc
     # print("AI MOVE")
-    if jucator == 1:
+    if jucator == jucator_initial:
         # daca jucatorul este JMAX aleg estimarea maxima
         best_move = max(mutari_cu_estimare, key=lambda x: x.estimare)
+        best_estimare = best_move.estimare
+        best_mutari = [mutare for mutare in mutari_cu_estimare if mutare.estimare == best_estimare]
+        best_move = random.choice(best_mutari)
     else:
-        best_move = min(mutari_cu_estimare, key=lambda x: x.estimare)
-
+        best_estimare = min(mutari_cu_estimare, key=lambda x: x.estimare).estimare
+        best_mutari = [mutare for mutare in mutari_cu_estimare if mutare.estimare == best_estimare]
+        best_move = random.choice(best_mutari)
     return best_move

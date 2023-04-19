@@ -79,6 +79,9 @@ class StareJoc:
         self.window.fill((160, 160, 150))  # culoarea de fundal al tablei
         self.clock = pygame.time.Clock()  # folosim pentru a seta refresh rate-ul
 
+        # Setam un timer care va forta update-ul ferestrei la fiecare 50ms
+        pygame.time.set_timer(pygame.USEREVENT, 50)
+
         while not end:
             try:
                 for event in pygame.event.get():
@@ -88,6 +91,8 @@ class StareJoc:
                     elif event.type == pygame.QUIT:
                         end = True
                         click_event.set()
+                    elif event.type == pygame.USEREVENT:
+                        pygame.display.flip()
 
                     # desenam detaliile tablei(fundalul, liniiile intre piese_tablale pieselor si piesele
                     self.desenare_tabla()
@@ -557,5 +562,5 @@ class StareJoc:
             if valoare == jucator:
                 if self.check_moara(index, jucator):
                     scor += 1
-        scor -= depth / 2
+        # scor -= depth / 10
         return scor
