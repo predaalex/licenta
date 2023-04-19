@@ -56,14 +56,21 @@ def alignImages(im1, im2):
 
     # print(f"points1 = {points1.shape}")
     # print(f"points2 = {points2.shape}")
-    # Find homography
-    h, mask = cv.findHomography(points1, points2, cv.RANSAC)
+    print(points1)
 
-    # Use homography
-    height, width, channels = im2.shape
-    im1Reg = cv.warpPerspective(im1, h, (width, height))
+    if len(points1) >= 4:
+        # Find homography
+        h, mask = cv.findHomography(points1, points2, cv.RANSAC)
 
-    return im1Reg, h
+          # Use homography
+        height, width, channels = im2.shape
+        im1Reg = cv.warpPerspective(im1, h, (width, height))
+
+        return im1Reg, h
+    else:
+        print("no keypoints matching")
+        return im1, 0
+
 
 
 ######################################################################################
