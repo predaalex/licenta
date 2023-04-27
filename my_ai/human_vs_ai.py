@@ -9,6 +9,32 @@ ai_depth = 3
 
 # consideram ca player1 ( JMIN este cel care incepe )
 jucator = joc.JMIN
+
+
+def ai_muta_piesa():
+    global urmatoarea_stare, urmatoarea_stare
+    # returneaza starea viitoare aleasa de min max
+    urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc,
+                                                         jucator_initial=jucator, jucator=jucator,
+                                                         max_depth=ai_depth, depth=ai_depth)
+    while urmatoarea_stare.parinte is not None:
+        urmatoarea_stare = urmatoarea_stare.parinte
+    urmatoarea_stare.estimare = urmatoarea_stare.estimare_scor(0, joc.JMAX) - \
+                                urmatoarea_stare.estimare_scor(0, joc.JMIN)
+    # print(f"joc = {joc.estimare} urm_stare = {urmatoarea_stare.estimare}")  # DEBUG
+    # print(f"index_next_move = {urmatoarea_stare.index_move}") # DEBUG
+    # Daca ai-ul face o moara, sa elimine o piese a adversarului
+    if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
+        print("ai-ul a facut o moara BLANA")  # DEBUG
+        # if urmatoarea_stare.estimare - joc.estimare > 0:
+        #     print("ai-ul a facut o moara")  # DEBUG
+        joc.JMIN_num_piese -= 1
+
+        urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+    joc.piese_tabla = urmatoarea_stare.piese_tabla
+    print("ai-ul a mutat o piesa")
+
+
 try:
     # in prima faza a jocului, fiecare jucator isi pozitioneaza cele 9 piese
     print("Jucatorii trebuie sa isi plaseze piesele pe tabla")
@@ -59,8 +85,14 @@ try:
     # in a doua faza a jocului, cei doi jucatori muta piesele pana cand unul dintre ei castiga
     jmin_win = False
     jmax_win = False
+    first_move = True
     while True:
         if jucator == joc.JMIN:
+            if first_move:
+                jmin_win = joc.check_castigator(joc.JMIN)
+                if jmin_win:
+                    break
+                first_move = False
             print('-------- 1st PLAYER TURN --------')
             # print(str(joc))
             joc.muta_piesa(jucator)
@@ -75,30 +107,9 @@ try:
             print('-------- 2st PLAYER TURN --------')
             # print(str(joc))
 
-            # returneaza starea viitoare aleasa de min max
-            urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc, jucator=jucator, max_depth=ai_depth, depth=ai_depth)
-
-            while urmatoarea_stare.parinte is not None:
-                urmatoarea_stare = urmatoarea_stare.parinte
-
-            urmatoarea_stare.estimare = urmatoarea_stare.estimare_scor(0, joc.JMAX) - \
-                                        urmatoarea_stare.estimare_scor(0, joc.JMIN)
-
-            # print(f"joc = {joc.estimare} urm_stare = {urmatoarea_stare.estimare}")  # DEBUG
-            # print(f"index_next_move = {urmatoarea_stare.index_move}") # DEBUG
-            # Daca ai-ul face o moara, sa elimine o piese a adversarului
-            if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
-                print("ai-ul a facut o moara BLANA")  # DEBUG
-                # if urmatoarea_stare.estimare - joc.estimare > 0:
-                #     print("ai-ul a facut o moara")  # DEBUG
-                joc.JMIN_num_piese -= 1
-
-                urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
-
-            joc.piese_tabla = urmatoarea_stare.piese_tabla
-            print("ai-ul a mutat o piesa")
+            ai_muta_piesa()
             jmax_win = joc.check_castigator(joc.JMAX)
-            print(f"jmax_win_check:{jmax_win}")  # DEBUG
+            # print(f"jmax_win_check:{jmax_win}")  # DEBUG
             if jmax_win:
                 break
             jucator *= -1

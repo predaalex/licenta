@@ -1,38 +1,129 @@
+import glob
 import math
 import sys
-
+import cv2 as cv
 import numpy as np
 import pygame
-from threading import Thread
+import torch
+import torchvision.models as models
+import torchvision.transforms as transforms
+from PIL import Image
+from joblib import load
+from torch.autograd import Variable
 from threading import Event
+from threading import Thread
 
 x_click = 0
 y_click = 0
-click_event = Event()
+configuratie_noua = None
+GOOD_MATCH_PERCENT = 0.7
+MAX_MATCHES = 1000
+game_event = Event()
 
 # global x_click, y_click, click_settings
 
 # referinta la ce piese din array-ul piese_tabla au deasupra lor(lookup table)
 above_arr = [-1, -1, -1,  # linia 1 de piese
-             -1,  1, -1,  # linia 2
-             -1,  4, -1,  # linia 3
-             0,   3,  6,   8, 5, 2,  # linia 4
+             -1, 1, -1,  # linia 2
+             -1, 4, -1,  # linia 3
+             0, 3, 6, 8, 5, 2,  # linia 4
              11, -1, 12,  # linia 5
              10, 16, 13,  # linia 6
-             9,  19, 14]  # linia 7
+             9, 19, 14]  # linia 7
 # coordonatele pieselor pe tabla(1, 7, 13 pentru ca este adaugata si spatierea
-coord_arr = np.array([(1, 1),  (7, 1),  (13, 1),
-                      (3, 3),  (7, 3),  (11, 3),
-                      (5, 5),  (7, 5),  (9,  5),
-                      (1, 7),  (3, 7),  (5,  7), (9, 7), (11, 7), (13, 7),
-                      (5, 9),  (7, 9),  (9,  9),
+coord_arr = np.array([(1, 1), (7, 1), (13, 1),
+                      (3, 3), (7, 3), (11, 3),
+                      (5, 5), (7, 5), (9, 5),
+                      (1, 7), (3, 7), (5, 7), (9, 7), (11, 7), (13, 7),
+                      (5, 9), (7, 9), (9, 9),
                       (3, 11), (7, 11), (11, 11),
                       (1, 13), (7, 13), (13, 13)],
                      dtype=[('x', 'i4'), ('y', 'i4')])
 
 
+def alignImages(im1, im2):
+    # Convert images to grayscale
+    im1Gray = cv.cvtColor(im1, cv.COLOR_BGR2GRAY)
+    im2Gray = cv.cvtColor(im2, cv.COLOR_BGR2GRAY)
+
+    # Detect AKAZE featyres and compute descriptors
+    akaze = cv.AKAZE_create()
+    keypoints1, descriptors1 = akaze.detectAndCompute(im1Gray, None)
+    keypoints2, descriptors2 = akaze.detectAndCompute(im2Gray, None)
+
+    # Detect ORB features and compute descriptors.
+    # sift = cv.xfeatures2d.SIFT_create(MAX_MATCHES)
+    # keypoints1, descriptors1 = sift.detectAndCompute(im1Gray, None)
+    # keypoints2, descriptors2 = sift.detectAndCompute(im2Gray, None)
+
+    # orb = cv.ORB_create(MAX_MATCHES)
+    # keypoints1, descriptors1 = orb.detectAndCompute(im1Gray, None)
+    # keypoints2, descriptors2 = orb.detectAndCompute(im2Gray, None)
+
+    # Match features.
+    # matcher = cv.DescriptorMatcher_create(cv.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
+    # matches = matcher.match(descriptors1, descriptors2, None)
+    # matches = list(matches)
+
+    bf = cv.BFMatcher(cv.NORM_L1, crossCheck=True)
+    matches = bf.match(descriptors1, descriptors2)
+    matches = list(matches)
+
+    # Sort matches by score
+    matches.sort(key=lambda x: x.distance, reverse=False)
+
+    # Remove not so good matches
+    numGoodMatches = int(len(matches) * GOOD_MATCH_PERCENT)
+    matches = matches[:numGoodMatches]
+
+    # Draw top matches
+    # imMatches = cv.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
+    # cv.imshow("matches", imMatches)
+    # cv.imwrite("matches.jpg", imMatches)
+
+    # Extract location of good matches
+    points1 = np.zeros((len(matches), 2), dtype=np.float32)
+    points2 = np.zeros((len(matches), 2), dtype=np.float32)
+
+    for i, match in enumerate(matches):
+        points1[i, :] = keypoints1[match.queryIdx].pt
+        points2[i, :] = keypoints2[match.trainIdx].pt
+
+    # print(f"points1 = {points1.shape}")
+    # print(f"points2 = {points2.shape}")
+    # print(points1)
+
+    if len(points1) >= 4:
+        # Find homography
+        h, mask = cv.findHomography(points1, points2, cv.RANSAC)
+
+        # Use homography
+        height, width, channels = im2.shape
+        im1Reg = cv.warpPerspective(im1, h, (width, height))
+
+        return im1Reg, h
+    else:
+        print("no keypoints matching")
+        return im1, 0
+
+
+def get_configuratie_camera():
+    global configuratie_noua, game_event
+
+    if configuratie_noua is None:
+        game_event.wait()
+
+    print("get_configuratie_camera")
+
+    configuratie_noua_aux = configuratie_noua
+    configuratie_noua = None
+    game_event.clear()
+
+    return configuratie_noua_aux
+
+
 class StareJoc:
-    def __init__(self, tabla=None, GUI=True, parinte=None, index_move=None):
+    def __init__(self, tabla=None, GUI=True, parinte=None, index_move=None, camera=False):
         self.estimare = None
         self.raza_piesa = None
         self.culoare_jucator2 = None
@@ -47,9 +138,20 @@ class StareJoc:
         self.clock = None
         self.parinte = parinte
         self.index_move = index_move
+        self.camera = camera
+        if self.camera:
+            # Initializare camera
+            self.video_image = cv.VideoCapture(0)  # 0 - fol camera defaul t | aceasta imagine va fi aliniata
+            # importam modelul de clasificare
+            self.model = load("model_clasificare_piesa.joblib")
+            self.resnet_model = models.resnet18(pretrained=True)
+            self.layer = self.resnet_model._modules.get('avgpool')
+            self.resnet_model.eval()
+
         self.reset(tabla)
         if GUI:
             self.init_GUI()
+
 
     def __str__(self):
         return self.afisare_tabla()
@@ -69,11 +171,12 @@ class StareJoc:
         threading.start()
 
     def update_gui(self):
-        global x_click, y_click, click_event
+        global x_click, y_click, game_event, configuratie_noua
         end = False
 
         # Initializam jocul
         pygame.init()
+        # space_event = pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_SPACE})
         self.window = pygame.display.set_mode(size=(700, 700))
         pygame.display.set_caption("Tintar -> Preda Alexandru-Florin")
         self.window.fill((160, 160, 150))  # culoarea de fundal al tablei
@@ -85,12 +188,17 @@ class StareJoc:
         while not end:
             try:
                 for event in pygame.event.get():
-                    if event.type == pygame.MOUSEBUTTONDOWN:
+                    if (not self.camera) and event.type == pygame.MOUSEBUTTONDOWN:
                         x_click, y_click = pygame.mouse.get_pos()
-                        click_event.set()
+                        game_event.set()
+                    elif self.camera and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                        print("am apasat space")
+                        configuratie_noua = self.get_configuratie_from_camera_screenshot()
+                        # print(configuratie_noua)  # DEBUG
+                        game_event.set()
                     elif event.type == pygame.QUIT:
                         end = True
-                        click_event.set()
+                        game_event.set()
                     elif event.type == pygame.USEREVENT:
                         pygame.display.flip()
 
@@ -111,7 +219,7 @@ class StareJoc:
         self.scala_imaginii = 50
         self.raza_piesa = 30
         self.culoare_jucator1 = (50, 140, 50)
-        self.culoare_jucator2 = (30, 30, 90)
+        self.culoare_jucator2 = (170, 70, 80)
         self.window.fill((160, 160, 150))  # culoarea de fundal al tablei
         # trasam liniile intre piese_tablale pieselor
         # primul rand de linii exteriorare
@@ -324,16 +432,16 @@ class StareJoc:
         return result
 
     def get_pos_tabla_from_click(self):
-        global x_click, y_click, click_event, coord_arr
+        global x_click, y_click, game_event, coord_arr
 
         if x_click == y_click == 0:
-            click_event.wait()
+            game_event.wait()
 
         x_click_aux = x_click
         y_click_aux = y_click
 
         x_click = y_click = 0
-        click_event.clear()
+        game_event.clear()
 
         # print(f"x = {x_click_aux} || y = {y_click_aux}")  # DEBUG
         for index, (x, y) in enumerate(coord_arr):
@@ -382,7 +490,7 @@ class StareJoc:
                 self.get_index_sus(index), self.get_index_jos(index)]
 
     def pune_piesa(self, jucator):
-        # indexul pos  pieselor unde a fost facut click-ul, -1 daca este pos invalida
+        # indexul pos pieselor unde a fost facut click-ul, -1 daca este pos invalida
         index_pos = self.get_pos_tabla_from_click()
         # verific daca este o pozitie valida
         if index_pos == -1:
@@ -393,7 +501,7 @@ class StareJoc:
             return self.pune_piesa(jucator)
         else:
             self.piese_tabla[index_pos] = jucator
-            print("Piesa a fost pusa cu succes") # debug
+            print("Piesa a fost pusa cu succes")
 
             # verificam daca piesa pusa formeaza o moara
             if self.check_moara(index_pos, jucator):
@@ -562,5 +670,69 @@ class StareJoc:
             if valoare == jucator:
                 if self.check_moara(index, jucator):
                     scor += 1
-        # scor -= depth / 10
+        scor -= depth
         return scor
+
+    def get_configuratie_from_camera_screenshot(self):
+        print("get_configuratie_from_camera_screenshot")
+        success, camera_frame = self.video_image.read()
+        img_template = cv.imread("../resources/template_test3.jpg")
+        img_template = cv.resize(img_template, (350, 350))
+        # cv.imshow("camera frame", camera_frame)
+        img_aliniata, h = alignImages(camera_frame, img_template)
+        # cv.imshow("img_aliniata", img_aliniata)
+
+        lista_imagini_pozitii = \
+            [img_aliniata[0:50, 0:50, :], img_aliniata[0:50, 150:200, :], img_aliniata[0:50, 300:350, :],
+             img_aliniata[45:95, 45:95, :], img_aliniata[45:95, 150:200, :], img_aliniata[45:95, 250:300, :],
+             img_aliniata[90:140, 93:143, :], img_aliniata[90:140, 150:200, :], img_aliniata[90:140, 215:265, :],
+             img_aliniata[150:200, 0:50, :], img_aliniata[150:200, 50:100, :], img_aliniata[150:200, 90:140, :],
+             img_aliniata[150:200, 215:265, :], img_aliniata[150:200, 255:305, :], img_aliniata[145:200, 300:350, :],
+             img_aliniata[210:260, 93:143, :], img_aliniata[210:260, 150:200, :], img_aliniata[210:260, 215:265, :],
+             img_aliniata[255:305, 50:100, :], img_aliniata[255:305, 150:200, :], img_aliniata[255:305, 250:300, :],
+             img_aliniata[300:350, 0:50, :], img_aliniata[300:350, 150:200, :], img_aliniata[300:350, 300:350, :]]
+        configuratie_camera = []
+        for img in lista_imagini_pozitii:
+            label = self.model.predict(self.image_to_resnet_descriptors(img))
+            # cv.imshow("img", img)  # DEBUG
+            # print(label)
+            if label == "pozitii_libere":
+                configuratie_camera.append(0)
+            elif label == "piese_verzi":
+                configuratie_camera.append(1)
+            elif label == "piese_portocalii":
+                configuratie_camera.append(-1)
+            else:
+                print("EROARE -> PIESA DETECTATATA NU CORESPUNE MODELULUI")
+            # cv.waitKey(0)  # DEBUG
+        # cv.destroyWindow("img")  # DEBUG
+        print(configuratie_camera)  # DEBUG
+        # cv.waitKey(0)
+        # cv.destroyWindow("img_aliniata")
+        # cv.destroyWindow("camera frame")
+        return np.array(configuratie_camera)
+
+    def image_to_resnet_descriptors(self, img):
+        images = []
+
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        to_tensor = transforms.ToTensor()
+        scaler = transforms.Resize((50, 50))
+
+        img_PIL = Image.fromarray(img)
+        t_img = Variable(normalize(to_tensor(scaler(img_PIL))).unsqueeze(0))
+        my_embedding = torch.zeros(512)
+
+        def copy_data(m, i, o):
+            my_embedding.copy_(o.data.reshape(o.data.size(1)))
+
+        h = self.layer.register_forward_hook(copy_data)
+        self.resnet_model(t_img)
+        h.remove()
+        my_embedding = my_embedding.numpy()
+
+        images.append(my_embedding)
+
+        images = np.array(images)
+
+        return images

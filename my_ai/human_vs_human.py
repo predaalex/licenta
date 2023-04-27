@@ -24,10 +24,19 @@ try:
             jucator *= -1
 
     print("Jucatorii trebuie sa isi mute piesele pe tabla")
+    first_move = True
     # in a doua faza a jocului, cei doi jucatori muta piesele pana cand unul dintre ei castiga
     while not joc.check_castigator(-jucator):
-        print(f"check:{joc.check_castigator(jucator)} -> {jucator}")
+        print(f"check:{joc.check_castigator(-jucator)} -> {-jucator}")
         if jucator == joc.JMIN:
+            if first_move:
+                jmin_win = joc.check_castigator(joc.JMIN)
+                if jmin_win:
+                    break
+                jmax_win = joc.check_castigator(joc.JMAX)
+                if jmax_win:
+                    break
+                first_move = False
             print('-------- 1st PLAYER TURN --------')
             # print(str(joc))
             joc.muta_piesa(jucator)
