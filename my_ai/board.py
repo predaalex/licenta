@@ -1,17 +1,15 @@
-import glob
 import math
-import sys
 import cv2 as cv
 import numpy as np
 import pygame
 import torch
 import torchvision.models as models
 import torchvision.transforms as transforms
+from threading import Event
+from threading import Thread
 from PIL import Image
 from joblib import load
 from torch.autograd import Variable
-from threading import Event
-from threading import Thread
 
 x_click = 0
 y_click = 0
@@ -113,7 +111,7 @@ def get_configuratie_camera():
     if configuratie_noua is None:
         game_event.wait()
 
-    print("get_configuratie_camera")
+    # print("get_configuratie_camera") # DEBUG
 
     configuratie_noua_aux = configuratie_noua
     configuratie_noua = None
@@ -124,11 +122,11 @@ def get_configuratie_camera():
 
 class StareJoc:
     def __init__(self, tabla=None, GUI=True, parinte=None, index_move=None, camera=False):
-        self.estimare = None
-        self.raza_piesa = None
+        self.estimare = 0
+        self.raza_piesa = 30
+        self.scala_imaginii = 50
         self.culoare_jucator2 = None
         self.culoare_jucator1 = None
-        self.scala_imaginii = None
         self.piese_tabla = None
         self.JMAX_num_piese = None
         self.JMIN_num_piese = None
@@ -139,6 +137,8 @@ class StareJoc:
         self.parinte = parinte
         self.index_move = index_move
         self.camera = camera
+        self.end = False
+
         if self.camera:
             # Initializare camera
             self.video_image = cv.VideoCapture(0)  # 0 - fol camera defaul t | aceasta imagine va fi aliniata
@@ -151,7 +151,6 @@ class StareJoc:
         self.reset(tabla)
         if GUI:
             self.init_GUI()
-
 
     def __str__(self):
         return self.afisare_tabla()
@@ -168,15 +167,15 @@ class StareJoc:
     def init_GUI(self):
         # Facem threadul care tine tabla updatata
         threading = Thread(target=self.update_gui)
+
+        # Pornim threadul
         threading.start()
 
     def update_gui(self):
         global x_click, y_click, game_event, configuratie_noua
-        end = False
 
         # Initializam jocul
         pygame.init()
-        # space_event = pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_SPACE})
         self.window = pygame.display.set_mode(size=(700, 700))
         pygame.display.set_caption("Tintar -> Preda Alexandru-Florin")
         self.window.fill((160, 160, 150))  # culoarea de fundal al tablei
@@ -185,19 +184,19 @@ class StareJoc:
         # Setam un timer care va forta update-ul ferestrei la fiecare 50ms
         pygame.time.set_timer(pygame.USEREVENT, 50)
 
-        while not end:
+        while not self.end:
             try:
                 for event in pygame.event.get():
                     if (not self.camera) and event.type == pygame.MOUSEBUTTONDOWN:
                         x_click, y_click = pygame.mouse.get_pos()
                         game_event.set()
                     elif self.camera and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                        print("am apasat space")
+                        # print("am apasat space") # DEBUG
                         configuratie_noua = self.get_configuratie_from_camera_screenshot()
                         # print(configuratie_noua)  # DEBUG
                         game_event.set()
                     elif event.type == pygame.QUIT:
-                        end = True
+                        self.end = True
                         game_event.set()
                     elif event.type == pygame.USEREVENT:
                         pygame.display.flip()
@@ -209,15 +208,12 @@ class StareJoc:
                     # setam refresh rate-ul
                     self.clock.tick(60)
             except pygame.event:
-                sys.exit(0)
+                pygame.quit()
         pygame.quit()
-        sys.exit(0)
 
     def desenare_tabla(self):
         global coord_arr
         # 700 / 14 (13 coloane) = 50
-        self.scala_imaginii = 50
-        self.raza_piesa = 30
         self.culoare_jucator1 = (50, 140, 50)
         self.culoare_jucator2 = (170, 70, 80)
         self.window.fill((160, 160, 150))  # culoarea de fundal al tablei
@@ -490,10 +486,14 @@ class StareJoc:
                 self.get_index_sus(index), self.get_index_jos(index)]
 
     def pune_piesa(self, jucator):
+        if self.end:
+            return
         # indexul pos pieselor unde a fost facut click-ul, -1 daca este pos invalida
         index_pos = self.get_pos_tabla_from_click()
         # verific daca este o pozitie valida
         if index_pos == -1:
+            if self.end:
+                return
             print("Pozitia nu a fost gasita")
             return self.pune_piesa(jucator)
         elif not self.pos_empty(index_pos):
@@ -573,7 +573,6 @@ class StareJoc:
 
     def check_moara(self, index_mutare, jucator):
         # daca pe rand sau coloana sunt 3 piese alaturate
-
         # linie
         # verific daca piesa este in dreapta
         if self.get_index_stanga(index_mutare) != -1 and self.piese_tabla[index_mutare - 1] == jucator and \
@@ -674,7 +673,7 @@ class StareJoc:
         return scor
 
     def get_configuratie_from_camera_screenshot(self):
-        print("get_configuratie_from_camera_screenshot")
+        # print("get_configuratie_from_camera_screenshot")
         success, camera_frame = self.video_image.read()
         img_template = cv.imread("../resources/template_test3.jpg")
         img_template = cv.resize(img_template, (350, 350))
@@ -706,7 +705,7 @@ class StareJoc:
                 print("EROARE -> PIESA DETECTATATA NU CORESPUNE MODELULUI")
             # cv.waitKey(0)  # DEBUG
         # cv.destroyWindow("img")  # DEBUG
-        print(configuratie_camera)  # DEBUG
+        # print(configuratie_camera)  # DEBUG
         # cv.waitKey(0)
         # cv.destroyWindow("img_aliniata")
         # cv.destroyWindow("camera frame")
