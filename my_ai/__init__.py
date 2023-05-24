@@ -330,6 +330,7 @@ def AIVsAI():
         jmin_win = False
         jmax_win = False
         first_move = True
+        numar_mutari = 0
         while True and not joc.end:
             if jucator == joc.JMIN:
                 if first_move:
@@ -339,6 +340,7 @@ def AIVsAI():
                     first_move = False
                 print('-------- 1st PLAYER TURN --------')
                 ai1_muta_piesa()
+                numar_mutari += 1
 
                 jmin_win = joc.check_castigator(joc.JMIN)
                 if jmin_win:
@@ -350,6 +352,8 @@ def AIVsAI():
                 print('-------- 2st PLAYER TURN --------')
 
                 ai2_muta_piesa()
+                numar_mutari += 1
+
 
                 jmax_win = joc.check_castigator(joc.JMAX)
                 if jmax_win:
@@ -371,6 +375,7 @@ def AIVsAI():
             print("--------ENND-----------")
 
         print(f"Jocul a durat:{time.time() - game_time} s")
+        print(f"Jocul a avut:{numar_mutari + 18} numar mutari")
 
     except KeyboardInterrupt:
         print("ai_vs_ai interrupted")
@@ -508,7 +513,7 @@ def HumanVsAI_Camera():
         joc.piese_tabla = configuratie_camera
         joc_aux = joc
         # verificam daca piesa pusa se afla intr-o moara
-        if joc.end and joc_aux.check_moara(index_mutare, jucator):
+        if not joc.end and joc_aux.check_moara(index_mutare, jucator):
             print("piesa pusa formeaza o moara, indeparteaza o piesa a adversarului")
             # eliminam o piesa a adversarului
             while not configuratie_valida:
