@@ -28,12 +28,12 @@ def min_max_pune_piese(stare_joc: StareJoc, jucator_initial, jucator, max_depth=
     # print(stare_joc.check_castigator(jucator))
     # print(stare_joc.check_castigator(-jucator))
     if depth <= 0:
-        if stare_joc.check_castigator(jucator):
+        if stare_joc.check_castigator(-jucator):
             stare_joc.estimare = 999
-        elif stare_joc.check_castigator(-jucator):
+        elif stare_joc.check_castigator(jucator):
             stare_joc.estimare = -999
         else:
-            stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator) - stare_joc.estimare_scor(depth, jucator)
+            stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator)
         # print(f"depth = {depth} "
         #       f"castigator = {stare_joc.check_castigator(jucator) or stare_joc.check_castigator(-jucator)} "
         #       f"scor = {stare_joc.estimare}")

@@ -8,12 +8,11 @@ import time
 
 
 def HumanVsAI():
-    global joc, ai_depth, jucator, urmatoarea_stare
+    global joc, ai_depth_put, ai_depth_move, jucator, urmatoarea_stare
     print("START Human vs AI")
     joc = board.StareJoc()
     if joc.end:
         print("--------ENND-----------")
-    ai_depth = 3
     # consideram ca player1 ( JMIN este cel care incepe )
     jucator = joc.JMIN
 
@@ -22,7 +21,7 @@ def HumanVsAI():
         # returneaza starea viitoare aleasa de min max
         urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc,
                                                              jucator_initial=jucator, jucator=jucator,
-                                                             max_depth=ai_depth, depth=ai_depth)
+                                                             max_depth=ai_depth_move, depth=ai_depth_move)
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
         urmatoarea_stare.estimare = urmatoarea_stare.estimare_scor(0, joc.JMAX) - \
@@ -40,12 +39,12 @@ def HumanVsAI():
         joc.piese_tabla = urmatoarea_stare.piese_tabla
         print("ai-ul a mutat o piesa")
 
-    def ai_pune_piesa(ai_depth, joc, jucator):
+    def ai_pune_piesa(ai_depth_put, joc, jucator):
         global urmatoarea_stare
         # returneaza starea viitoare aleasa de min max
         urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc,
                                                              jucator_initial=jucator, jucator=jucator,
-                                                             max_depth=ai_depth, depth=ai_depth)
+                                                             max_depth=ai_depth_put, depth=ai_depth_put)
         # print(urmatoarea_stare) DEBUG
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
@@ -78,7 +77,7 @@ def HumanVsAI():
             elif jucator == joc.JMAX and not joc.end:
                 print('-------- 2st PLAYER TURN --------')
 
-                ai_pune_piesa(ai_depth, joc, jucator)
+                ai_pune_piesa(ai_depth_put, joc, jucator)
                 jucator *= -1
         if not joc.end:
             print("Jucatorii trebuie sa isi mute piesele pe tabla")
@@ -196,9 +195,8 @@ def HumanVsHuman():
 
 
 def AIVsAI():
-    global joc, ai_depth, jucator
+    global joc, ai_depth_put, ai_depth_move, jucator
     joc = board.StareJoc(GUI=True)
-    ai_depth = 3
     game_time = time.time()
     move_time = None
     # consideram ca player1 ( JMIN este cel care incepe )
@@ -207,15 +205,10 @@ def AIVsAI():
     def ai1_pune_piesa():
         global move_time, urmatoarea_stare, urmatoarea_stare
         move_time = time.time()
-        # print(str(joc))
-        # returneaza starea viitoare aleasa de min max
-        # if i < 9:
-        #     ai_depth = 3
-        # else:
-        #     ai_depth = 5
+
         urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc,
                                                              jucator_initial=jucator, jucator=jucator,
-                                                             max_depth=ai_depth, depth=ai_depth)
+                                                             max_depth=ai_depth_put, depth=ai_depth_put)
         # print(urmatoarea_stare) DEBUG
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
@@ -241,15 +234,11 @@ def AIVsAI():
     def ai2_pune_piesa():
         global move_time, urmatoarea_stare, urmatoarea_stare
         move_time = time.time()
-        # print(str(joc)) DEBUG
-        # if i < 9:
-        #     ai_depth = 3
-        # else:
-        #     ai_depth = 5
+
         # returneaza starea viitoare aleasa de min max
         urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc,
                                                              jucator_initial=jucator, jucator=jucator,
-                                                             max_depth=ai_depth, depth=ai_depth)
+                                                             max_depth=ai_depth_put, depth=ai_depth_put)
         # print(urmatoarea_stare) DEBUG
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
@@ -279,7 +268,7 @@ def AIVsAI():
         # returneaza starea viitoare aleasa de min max
         urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc,
                                                              jucator_initial=jucator, jucator=jucator,
-                                                             max_depth=ai_depth, depth=ai_depth)
+                                                             max_depth=ai_depth_move, depth=ai_depth_move)
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
         urmatoarea_stare.estimare = urmatoarea_stare.estimare_scor(0, joc.JMIN) - \
@@ -305,7 +294,7 @@ def AIVsAI():
         # returneaza starea viitoare aleasa de min max
         urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc,
                                                              jucator_initial=jucator, jucator=jucator,
-                                                             max_depth=ai_depth, depth=ai_depth)
+                                                             max_depth=ai_depth_move, depth=ai_depth_move)
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
         urmatoarea_stare.estimare = urmatoarea_stare.estimare_scor(0, joc.JMAX) - \
@@ -337,7 +326,6 @@ def AIVsAI():
                 jucator *= -1
         if not joc.end:
             print("Jucatorii trebuie sa isi mute piesele pe tabla")
-        # ai_depth += 2
         # in a doua faza a jocului, cei doi jucatori muta piesele pana cand unul dintre ei castiga
         jmin_win = False
         jmax_win = False
@@ -389,64 +377,19 @@ def AIVsAI():
         pygame.quit()
 
 
-class PyWindow:
-
-    def __init__(self):
-        self.window = None
-        sg.theme("DarkAmber")
-        self.create_window()
-
-    def create_window(self):
-        layout = self.create_window_layout()
-
-        self.window = sg.Window("Tintar <=> Preda Alexandru-Florin", layout, no_titlebar=False)
-
-    def create_window_layout(self):
-        tab_group_layout = self.create_tabs()
-
-        return [[sg.TabGroup(tab_group_layout,
-                             enable_events=True,
-                             key="-TABGROUP-")]]
-
-    def create_tabs(self):
-        tab1_layout = self.game_tab()
-        tab2_layout = self.options_tab()
-
-        tab1 = sg.Tab("GAME", tab1_layout, font="Courier 15", key="-TAB1-")
-        tab2 = sg.Tab("OPTIONS", tab2_layout, font="Courier 15", key="-TAB2-")
-
-        return [[tab1, tab2]]
-
-    def game_tab(self):
-        return [[sg.Text("Welcome to Nine Men's Morrys Game")],
-                [sg.Text("Select the type of game you want to play in PyGame")],
-                [sg.Button("Human vs Human", key="-HvsH-")],
-                [sg.Button("Human vs AI", key="-HvsAI-")],
-                [sg.Button("AI vs AI", key="-AIvsAI-")],
-                [sg.Text("Select the type of game you want to play using camera syncronization")],
-                [sg.Button("Human vs AI", key="-HvsAI_Camera-")]]
-
-    def options_tab(self):
-        return [[sg.Text("You can set the engine settings or it will use the default ones")]]
-
-
-window = PyWindow().window
-
-
 def HumanVsAI_Camera():
-    global jucator, ai_depth, joc
+    global jucator, ai_depth_move, ai_depth_put, joc
     # Initializare Pygame
     joc = board.StareJoc(camera=True)
     # consideram ca player1 ( JMIN este cel care incepe )
     jucator = joc.JMIN
-    ai_depth = 3
 
     def ai_muta_piesa():
         global urmatoarea_stare, urmatoarea_stare
         # returneaza starea viitoare aleasa de min max
         urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc,
                                                              jucator_initial=jucator, jucator=jucator,
-                                                             max_depth=ai_depth, depth=ai_depth)
+                                                             max_depth=ai_depth_move, depth=ai_depth_move)
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
         urmatoarea_stare.estimare = urmatoarea_stare.estimare_scor(0, joc.JMAX) - \
@@ -469,7 +412,7 @@ def HumanVsAI_Camera():
         # returneaza starea viitoare aleasa de min max
         urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc,
                                                              jucator_initial=jucator, jucator=jucator,
-                                                             max_depth=ai_depth, depth=ai_depth)
+                                                             max_depth=ai_depth_put, depth=ai_depth_put)
         # print(urmatoarea_stare) DEBUG
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
@@ -647,6 +590,60 @@ def HumanVsAI_Camera():
         pygame.quit()
 
 
+class PyWindow:
+
+    def __init__(self):
+        self.window = None
+        sg.theme("DarkAmber")
+        self.create_window()
+
+    def create_window(self):
+        layout = self.create_window_layout()
+
+        self.window = sg.Window("Tintar <=> Preda Alexandru-Florin", layout, no_titlebar=False)
+
+    def create_window_layout(self):
+        tab_group_layout = self.create_tabs()
+
+        return [[sg.TabGroup(tab_group_layout,
+                             enable_events=True,
+                             key="-TABGROUP-")]]
+
+    def create_tabs(self):
+        tab1_layout = self.game_tab()
+        tab2_layout = self.options_tab()
+
+        tab1 = sg.Tab("GAME", tab1_layout, font="Courier 15", key="-TAB1-")
+        tab2 = sg.Tab("OPTIONS", tab2_layout, font="Courier 15", key="-TAB2-")
+
+        return [[tab1, tab2]]
+
+    def game_tab(self):
+        return [[sg.Text("Welcome to Nine Men's Morrys Game")],
+
+                [sg.Frame("Select the type of game you want to play in PyGame",
+                          [[sg.Button("Human vs Human", key="-HvsH-")],
+                           [sg.Button("Human vs AI", key="-HvsAI-")],
+                           [sg.Button("AI vs AI", key="-AIvsAI-")]]
+                          )],
+                [sg.Frame("Select the type of game you want to play using camera syncronization",
+                          [[sg.Button("Human vs AI", key="-HvsAI_Camera-")]]
+                          )]]
+
+    def options_tab(self):
+        return [[sg.Text("You can set the engine settings or it will use the default ones")],
+                [sg.Frame("Min-Max parameters",
+                          [[sg.Text("Depth of ai putting pieces"),
+                            sg.Slider(range=(1, 7), key="-AI_DEPTH_PUT-", orientation='v', size=(5, 20),
+                                      default_value=3),
+                            sg.Text("Depth of ai moving pieces"),
+                            sg.Slider(range=(1, 9), key="-AI_DEPTH_MOVE-", orientation='v', size=(5, 20),
+                                      default_value=3)]]
+                          )]]
+
+
+window = PyWindow().window
+
 while True:
     event, values = window.read(timeout=1)
 
@@ -654,6 +651,8 @@ while True:
         break
 
     if event != sg.TIMEOUT_KEY:
+        ai_depth_put = values["-AI_DEPTH_PUT-"]
+        ai_depth_move = values["-AI_DEPTH_MOVE-"]
         if event == "-HvsH-":
             HumanVsHuman()
         elif event == "-HvsAI-":

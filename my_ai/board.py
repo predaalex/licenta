@@ -509,9 +509,13 @@ class StareJoc:
                 self.sterge_piesa(jucator * (-1))
 
     def muta_piesa(self, jucator, get_start=True, index_pos_start=-1):
+        if self.end:
+            return
         # selectam piesa pe care vrem sa o mutam
         if get_start:
             index_pos_start = self.get_pos_tabla_from_click()
+            if self.end:
+                return
             if index_pos_start == -1:
                 print("Pozitia nu a fost gastia")
                 return self.muta_piesa(jucator)
@@ -526,7 +530,8 @@ class StareJoc:
 
         # selectam pozitia unde vrem sa o punem
         index_pos_mutare = self.get_pos_tabla_from_click()
-
+        if self.end:
+            return
         if index_pos_mutare == -1:
             print("Pozitia finala nu a fost gastia")
             return self.muta_piesa(jucator, False, index_pos_start)
@@ -669,7 +674,7 @@ class StareJoc:
             if valoare == jucator:
                 if self.check_moara(index, jucator):
                     scor += 1
-        scor -= depth
+        # scor += depth
         return scor
 
     def get_configuratie_from_camera_screenshot(self):
