@@ -1,6 +1,6 @@
 # licenta
 - [x] de implementat alpha beta
-- [ ] de facut in meniu optiunea de a alege engine-ul si de adaugat functionalitatea
+- [x] de facut in meniu optiunea de a alege engine-ul si de adaugat functionalitatea
 - [ ] de facut cele 9 tipuri de euristici si sa fac un "campionat" intre ele
 - [ ] de facut optiuni in meniu pentru a alege erustica dorita
 - [ ] de (incercat) implementarea de RL

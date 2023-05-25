@@ -19,8 +19,7 @@ def min_max_muta_piese(stare_joc: StareJoc, jucator_initial, jucator, max_depth=
     # print("AI MOVE")
     if jucator == jucator_initial:
         # daca jucatorul este JMAX aleg estimarea maxima
-        best_move = max(mutari_cu_estimare, key=lambda x: x.estimare)
-        best_estimare = best_move.estimare
+        best_estimare = max(mutari_cu_estimare, key=lambda x: x.estimare).estimare
         best_mutari = [mutare for mutare in mutari_cu_estimare if mutare.estimare == best_estimare]
         best_move = random.choice(best_mutari)
     else:
@@ -43,8 +42,7 @@ def min_max_pune_piese(stare_joc: StareJoc, jucator_initial, jucator, max_depth=
     # print("AI MOVE")
     if jucator == jucator_initial:
         # daca jucatorul este JMAX aleg estimarea maxima
-        best_move = max(mutari_cu_estimare, key=lambda x: x.estimare)
-        best_estimare = best_move.estimare
+        best_estimare = max(mutari_cu_estimare, key=lambda x: x.estimare).estimare
         best_mutari = [mutare for mutare in mutari_cu_estimare if mutare.estimare == best_estimare]
         best_move = random.choice(best_mutari)
     else:
@@ -63,7 +61,7 @@ def alpha_beta_pune_piesa(stare_joc: StareJoc, jucator_initial, jucator, alpha, 
         return stare_joc  # este intr-un interval valid deci nu o mai procesez
 
     stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
-    best_move = None
+    best_move = []
 
     if jucator == stare_joc.JMAX:
         estimare_curenta = float('-inf')
@@ -73,8 +71,11 @@ def alpha_beta_pune_piesa(stare_joc: StareJoc, jucator_initial, jucator, alpha, 
             stare_noua = alpha_beta_pune_piesa(stare_joc=mutare, jucator_initial=jucator_initial, jucator=-jucator,
                                                alpha=alpha, beta=beta, max_depth=max_depth, depth=depth-1)
 
+            if stare_noua.estimare == estimare_curenta:
+                best_move.append(stare_noua)
+
             if estimare_curenta < stare_noua.estimare:
-                best_move = stare_noua
+                best_move = [stare_noua]
                 estimare_curenta = stare_noua.estimare
 
             if alpha < stare_noua.estimare:
@@ -89,8 +90,11 @@ def alpha_beta_pune_piesa(stare_joc: StareJoc, jucator_initial, jucator, alpha, 
             stare_noua = alpha_beta_pune_piesa(stare_joc=mutare, jucator_initial=jucator_initial, jucator=-jucator,
                                                alpha=alpha, beta=beta, max_depth=max_depth, depth=depth - 1)
 
+            if stare_noua.estimare == estimare_curenta:
+                best_move.append(stare_noua)
+
             if estimare_curenta > stare_noua.estimare:
-                best_move = stare_noua
+                best_move = [stare_noua]
                 estimare_curenta = stare_noua.estimare
 
             if beta > stare_noua.estimare:
@@ -98,7 +102,10 @@ def alpha_beta_pune_piesa(stare_joc: StareJoc, jucator_initial, jucator, alpha, 
                 if alpha >= beta:
                     break
 
-    return best_move
+    if len(best_move) == 0:
+        return stare_joc
+
+    return random.choice(best_move)
 
 
 def alpha_beta_muta_piesa(stare_joc: StareJoc, jucator_initial, jucator, alpha, beta, max_depth=3, depth=3):
@@ -110,7 +117,7 @@ def alpha_beta_muta_piesa(stare_joc: StareJoc, jucator_initial, jucator, alpha, 
         return stare_joc
 
     stari = stari_posibile_muta_piese(stare_joc, jucator, max_depth, depth)
-    best_move = None
+    best_move = []
 
     if jucator == stare_joc.JMAX:
         estimare_curenta = float('-inf')
@@ -119,8 +126,11 @@ def alpha_beta_muta_piesa(stare_joc: StareJoc, jucator_initial, jucator, alpha, 
             stare_noua = alpha_beta_muta_piesa(stare_joc=mutare, jucator_initial=jucator_initial, jucator=-jucator,
                                                alpha=alpha, beta=beta, max_depth=max_depth, depth=depth-1)
 
+            if stare_noua.estimare == estimare_curenta:
+                best_move.append(stare_noua)
+
             if estimare_curenta < stare_noua.estimare:
-                best_move = stare_noua
+                best_move = [stare_noua]
                 estimare_curenta = stare_noua.estimare
 
             if alpha < stare_noua.estimare:
@@ -135,8 +145,11 @@ def alpha_beta_muta_piesa(stare_joc: StareJoc, jucator_initial, jucator, alpha, 
             stare_noua = alpha_beta_muta_piesa(stare_joc=mutare, jucator_initial=jucator_initial, jucator=-jucator,
                                                alpha=alpha, beta=beta, max_depth=max_depth, depth=depth-1)
 
+            if stare_noua.estimare == estimare_curenta:
+                best_move.append(stare_noua)
+
             if estimare_curenta > stare_noua.estimare:
-                best_move = stare_noua
+                best_move = [stare_noua]
                 estimare_curenta = stare_noua.estimare
 
             if beta > stare_noua.estimare:
@@ -144,7 +157,10 @@ def alpha_beta_muta_piesa(stare_joc: StareJoc, jucator_initial, jucator, alpha, 
                 if alpha >= beta:
                     break
 
-    return best_move
+    if len(best_move) == 0:
+        return stare_joc
+
+    return random.choice(best_move)
 
 
 def stari_posibile_pune_piese(stare_joc_parinte, jucator, max_depth, depth):
