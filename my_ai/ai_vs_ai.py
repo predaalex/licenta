@@ -184,9 +184,8 @@ try:
 
             jucator *= -1
 
-        print(f"numar piese  = {joc.JMAX_num_piese}")
-        print(f"nr_piese_jmin = {joc.JMAX_num_piese}")
-
+        print(f"numar piese jmax = {joc.JMAX_num_piese}")
+        print(f"numar piese jmin = {joc.JMIN_num_piese}")
 
     if jmin_win:
         print('--------- 1st PLAYER WON ------------')

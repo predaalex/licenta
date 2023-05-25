@@ -668,6 +668,10 @@ class StareJoc:
         return pozitii_libere
 
     def estimare_scor(self, depth, jucator):
+        if self.check_castigator(jucator):
+            return 999
+        if self.check_castigator(-jucator):
+            return -999
         # numarul de mori formate
         scor = 0
         for index, valoare in enumerate(self.piese_tabla):
