@@ -667,19 +667,31 @@ class StareJoc:
                 pozitii_libere.append(index)
         return pozitii_libere
 
-    def estimare_scor(self, depth, jucator):
+    def estimare_scor(self, depth, jucator, heuristic):
         if self.check_castigator(jucator):
             return 999
         if self.check_castigator(-jucator):
             return -999
-        # numarul de mori formate
+
         scor = 0
-        for index, valoare in enumerate(self.piese_tabla):
-            if valoare == jucator:
-                if self.check_moara(index, jucator):
-                    scor += 1
-        # scor += depth
-        return scor
+        if heuristic == "Number of closed morrises":
+            for index, valoare in enumerate(self.piese_tabla):
+                if valoare == jucator:
+                    if self.check_moara(index, jucator):
+                        scor += 1
+            return scor
+
+        player_counter = 0  # number of morris
+        enemy_counter = 0
+        if heuristic == "Difference between the number of yours and yours opponent’s morrises":
+            for index, valoare in enumerate(self.piese_tabla):
+                if valoare == jucator:
+                    if self.check_moara(index, jucator):
+                        player_counter += 1
+                elif valoare == -jucator:
+                    if self.check_moara(index, -jucator):
+                        enemy_counter += 1
+            return player_counter - enemy_counter
 
     def get_configuratie_from_camera_screenshot(self):
         # print("get_configuratie_from_camera_screenshot")

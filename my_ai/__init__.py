@@ -8,7 +8,7 @@ import time
 
 
 def HumanVsAI():
-    global joc, ai_depth_put, ai_depth_move, jucator, urmatoarea_stare, engine
+    global joc, ai_depth_put, ai_depth_move, jucator, urmatoarea_stare, engine, heuristic
     print("START Human vs AI")
     joc = board.StareJoc()
     if joc.end:
@@ -20,11 +20,11 @@ def HumanVsAI():
         global urmatoarea_stare
         # returneaza starea viitoare aleasa de min max
         if engine == "Min-Max":
-            urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc, heuristic=heuristic,
                                                                  jucator_initial=jucator, jucator=jucator,
                                                                  max_depth=ai_depth_move, depth=ai_depth_move)
         elif engine == "Alpha-Beta":
-            urmatoarea_stare = traditional_ai.alpha_beta_muta_piesa(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.alpha_beta_muta_piesa(stare_joc=joc, heuristic=heuristic,
                                                                     jucator_initial=jucator, jucator=jucator,
                                                                     max_depth=ai_depth_move, depth=ai_depth_move,
                                                                     alpha=-3000, beta=3000)
@@ -44,11 +44,11 @@ def HumanVsAI():
         global urmatoarea_stare
         # returneaza starea viitoare aleasa de min max
         if engine == "Min-Max":
-            urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc, heuristic=heuristic,
                                                                  jucator_initial=jucator, jucator=jucator,
                                                                  max_depth=ai_depth_put, depth=ai_depth_put)
         elif engine == "Alpha-Beta":
-            urmatoarea_stare = traditional_ai.alpha_beta_pune_piesa(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.alpha_beta_pune_piesa(stare_joc=joc, heuristic=heuristic,
                                                                     jucator_initial=jucator, jucator=jucator,
                                                                     max_depth=ai_depth_put, depth=ai_depth_put,
                                                                     alpha=-3000, beta=3000)
@@ -188,7 +188,7 @@ def HumanVsHuman():
 
 
 def AIVsAI():
-    global joc, ai_depth_put, ai_depth_move, jucator, engine
+    global joc, ai_depth_put, ai_depth_move, jucator, engine, heuristic
     joc = board.StareJoc(GUI=True)
     game_time = time.time()
     move_time = None
@@ -200,11 +200,11 @@ def AIVsAI():
         move_time = time.time()
 
         if engine == "Min-Max":
-            urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc, heuristic=heuristic,
                                                                  jucator_initial=jucator, jucator=jucator,
                                                                  max_depth=ai_depth_put, depth=ai_depth_put)
         elif engine == "Alpha-Beta":
-            urmatoarea_stare = traditional_ai.alpha_beta_pune_piesa(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.alpha_beta_pune_piesa(stare_joc=joc, heuristic=heuristic,
                                                                     jucator_initial=jucator, jucator=jucator,
                                                                     max_depth=ai_depth_put, depth=ai_depth_put,
                                                                     alpha=-3000, beta=3000)
@@ -228,11 +228,11 @@ def AIVsAI():
 
         # returneaza starea viitoare aleasa de min max
         if engine == "Min-Max":
-            urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc, heuristic=heuristic,
                                                                  jucator_initial=jucator, jucator=jucator,
                                                                  max_depth=ai_depth_put, depth=ai_depth_put)
         elif engine == "Alpha-Beta":
-            urmatoarea_stare = traditional_ai.alpha_beta_pune_piesa(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.alpha_beta_pune_piesa(stare_joc=joc, heuristic=heuristic,
                                                                     jucator_initial=jucator, jucator=jucator,
                                                                     max_depth=ai_depth_put, depth=ai_depth_put,
                                                                     alpha=-3000, beta=3000)
@@ -254,11 +254,11 @@ def AIVsAI():
         move_time = time.time()
         # returneaza starea viitoare aleasa de min max
         if engine == "Min-Max":
-            urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc, heuristic=heuristic,
                                                                  jucator_initial=jucator, jucator=jucator,
                                                                  max_depth=ai_depth_move, depth=ai_depth_move)
         elif engine == "Alpha-Beta":
-            urmatoarea_stare = traditional_ai.alpha_beta_muta_piesa(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.alpha_beta_muta_piesa(stare_joc=joc, heuristic=heuristic,
                                                                     jucator_initial=jucator, jucator=jucator,
                                                                     max_depth=ai_depth_move, depth=ai_depth_move,
                                                                     alpha=-3000, beta=3000)
@@ -280,11 +280,11 @@ def AIVsAI():
         # print(str(joc))
         # returneaza starea viitoare aleasa de min max
         if engine == "Min-Max":
-            urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc, heuristic=heuristic,
                                                                  jucator_initial=jucator, jucator=jucator,
                                                                  max_depth=ai_depth_move, depth=ai_depth_move)
         elif engine == "Alpha-Beta":
-            urmatoarea_stare = traditional_ai.alpha_beta_muta_piesa(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.alpha_beta_muta_piesa(stare_joc=joc, heuristic=heuristic,
                                                                     jucator_initial=jucator, jucator=jucator,
                                                                     max_depth=ai_depth_move, depth=ai_depth_move,
                                                                     alpha=-3000, beta=3000)
@@ -372,7 +372,7 @@ def AIVsAI():
 
 
 def HumanVsAI_Camera():
-    global jucator, ai_depth_move, ai_depth_put, joc
+    global jucator, ai_depth_move, ai_depth_put, joc, heuristic
     # Initializare Pygame
     joc = board.StareJoc(camera=True)
     # consideram ca player1 ( JMIN este cel care incepe )
@@ -382,11 +382,11 @@ def HumanVsAI_Camera():
         global urmatoarea_stare, urmatoarea_stare
         # returneaza starea viitoare aleasa de min max
         if engine == "Min-Max":
-            urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.min_max_muta_piese(stare_joc=joc, heuristic=heuristic,
                                                                  jucator_initial=jucator, jucator=jucator,
                                                                  max_depth=ai_depth_move, depth=ai_depth_move)
         elif engine == "Alpha-Beta":
-            urmatoarea_stare = traditional_ai.alpha_beta_muta_piesa(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.alpha_beta_muta_piesa(stare_joc=joc, heuristic=heuristic,
                                                                     jucator_initial=jucator, jucator=jucator,
                                                                     max_depth=ai_depth_move, depth=ai_depth_move,
                                                                     alpha=-3000, beta=3000)
@@ -405,11 +405,11 @@ def HumanVsAI_Camera():
         global urmatoarea_stare, urmatoarea_stare
         # returneaza starea viitoare aleasa de min max
         if engine == "Min-Max":
-            urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.min_max_pune_piese(stare_joc=joc, heuristic=heuristic,
                                                                  jucator_initial=jucator, jucator=jucator,
                                                                  max_depth=ai_depth_put, depth=ai_depth_put)
         elif engine == "Alpha-Beta":
-            urmatoarea_stare = traditional_ai.alpha_beta_pune_piesa(stare_joc=joc,
+            urmatoarea_stare = traditional_ai.alpha_beta_pune_piesa(stare_joc=joc, heuristic=heuristic,
                                                                     jucator_initial=jucator, jucator=jucator,
                                                                     max_depth=ai_depth_put, depth=ai_depth_put,
                                                                     alpha=-3000, beta=3000)
@@ -616,9 +616,12 @@ class PyWindow:
     @staticmethod
     def options_tab():
         return [[sg.Text("You can set the engine settings or it will use the default ones")],
-                [sg.Frame("Select the engine ai should use",
-                 [[sg.Text("Depth of ai putting pieces"),
-                   sg.Combo(["Alpha-Beta", "Min-Max"], default_value="Alpha-Beta", key="-AI-ALGORITHM-")]])],
+                [sg.Frame("Select the engine ai will use",
+                 [[sg.Combo(["Alpha-Beta", "Min-Max"], default_value="Alpha-Beta", key="-AI-ALGORITHM-")]])],
+                [sg.Frame("Select the heuristic ai will use",
+                 [[sg.Combo(["Number of closed morrises",
+                             "Difference between the number of yours and yours opponent’s morrises"],
+                            default_value="Number of closed morrises", key="-AI-HEURISTIC-")]])],
                 [sg.Frame("Min-Max | Alpha-Beta parameters",
                  [[sg.Text("Depth of ai putting pieces"),
                    sg.Slider(range=(1, 15), key="-AI_DEPTH_PUT-", orientation='v', size=(5, 20), default_value=3),
@@ -639,7 +642,9 @@ while True:
         ai_depth_put = values["-AI_DEPTH_PUT-"]
         ai_depth_move = values["-AI_DEPTH_MOVE-"]
         engine = values["-AI-ALGORITHM-"]
-        print(f"Algoritmul ai-ului este: {engine} cu adancimea {ai_depth_put} si {ai_depth_move}")
+        heuristic = values["-AI-HEURISTIC-"]
+        print(f"Algoritmul ai-ului este: {engine} cu adancimea {ai_depth_put} + {ai_depth_move} "
+              f"si euristica {heuristic}")
         if event == "-HvsH-":
             HumanVsHuman()
         elif event == "-HvsAI-":
