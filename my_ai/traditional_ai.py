@@ -185,71 +185,6 @@ def stari_posibile_pune_piese(stare_joc_parinte, jucator, max_depth, depth):
     return configuratii_posibile
 
 
-def doua_din_trei(stare_joc, index, jucator):
-    index_piesa_dreapta = stare_joc.get_index_dreapta(index)
-    index_piesa_dreapta_dreapta = stare_joc.get_index_dreapta(stare_joc.get_index_dreapta(index))
-    index_piesa_stanga = stare_joc.get_index_stanga(index)
-    index_piesa_stanga_stanga = stare_joc.get_index_stanga(stare_joc.get_index_stanga(index))
-    index_piesa_sus = stare_joc.get_index_sus(index)
-    index_piesa_sus_sus = stare_joc.get_index_sus(stare_joc.get_index_sus(index))
-    index_piesa_jos = stare_joc.get_index_jos(index)
-    index_piesa_jos_jos = stare_joc.get_index_jos(stare_joc.get_index_jos(index))
-
-    # pe linie in colturi
-    # stanga
-    if index_piesa_stanga != -1 and stare_joc.piese_tabla[index_piesa_stanga] == jucator and \
-            index_piesa_stanga_stanga != -1 and stare_joc.piese_tabla[index_piesa_stanga_stanga] == 0:
-        return True
-    # dreapta
-    if index_piesa_dreapta != -1 and stare_joc.piese_tabla[index_piesa_dreapta] == jucator and \
-            index_piesa_dreapta_dreapta != -1 and stare_joc.piese_tabla[index_piesa_dreapta_dreapta] == 0:
-        return True
-    # pe linie pe mijloc si stanga
-    if index_piesa_stanga != -1 and stare_joc.piese_tabla[index_piesa_stanga] == jucator and \
-            index_piesa_dreapta != -1 and stare_joc.piese_tabla[index_piesa_dreapta] == 0:
-        return True
-    # pe linie pe mijloc si dreapta
-    if index_piesa_dreapta != - 1 and stare_joc.piese_tabla[index_piesa_dreapta] == jucator and \
-            index_piesa_stanga != -1 and stare_joc.piese_tabla[index_piesa_stanga] == 0:
-        return True
-    # pe linie in colturi
-    if index_piesa_dreapta != -1 and stare_joc.piese_tabla[index_piesa_dreapta] == 0 and \
-            index_piesa_dreapta_dreapta != -1 and stare_joc.piese_tabla[index_piesa_dreapta_dreapta] == jucator:
-        return True
-    # pe linie in colturi
-    if index_piesa_stanga != -1 and stare_joc.piese_tabla[index_piesa_stanga] == 0 and \
-            index_piesa_stanga_stanga != -1 and stare_joc.piese_tabla[index_piesa_stanga_stanga] == jucator:
-        return True
-
-    # pe coloana in colturi
-    # sus
-    if index_piesa_jos != -1 and stare_joc.piese_tabla[index_piesa_jos] == jucator and \
-            index_piesa_jos_jos != -1 and stare_joc.piese_tabla[index_piesa_jos_jos] == 0:
-        return True
-    # jos
-    if index_piesa_sus != -1 and stare_joc.piese_tabla[index_piesa_sus] == jucator and \
-            index_piesa_sus_sus != -1 and stare_joc.piese_tabla[index_piesa_sus_sus] == 0:
-        return True
-    # pe coloana pe mijloc si sus
-    if index_piesa_sus != -1 and stare_joc.piese_tabla[index_piesa_sus] == jucator and \
-            index_piesa_jos_jos != -1 and stare_joc.piese_tabla[index_piesa_jos_jos] == 0:
-        return True
-    # pe coloana pe mijloc si jos
-    if index_piesa_jos != -1 and stare_joc.piese_tabla[index_piesa_jos] == jucator and \
-            index_piesa_sus_sus != -1 and stare_joc.piese_tabla[index_piesa_sus_sus] == 0:
-        return True
-    # pe coloana sus si jos
-    if index_piesa_sus != -1 and stare_joc.piese_tabla[index_piesa_sus] == 0 and \
-            index_piesa_sus_sus != -1 and stare_joc.piese_tabla[index_piesa_sus_sus] == jucator:
-        return True
-    # pe coloana jos si sus
-    if index_piesa_jos != -1 and stare_joc.piese_tabla[index_piesa_jos] == 0 and \
-            index_piesa_jos_jos != -1 and stare_joc.piese_tabla[index_piesa_jos_jos] == jucator:
-        return True
-
-    return False
-
-
 def indepartare_piesa(stare_joc: StareJoc, jucator):
     jucator *= -1
     # piesa adversarului eliminata va fi in urmatoarea ordine:
@@ -262,7 +197,7 @@ def indepartare_piesa(stare_joc: StareJoc, jucator):
     # 1. daca sunt 2 piese aproape sa faca o moara
     for index, piesa in enumerate(stare_joc.piese_tabla):
         if piesa == jucator:
-            if doua_din_trei(stare_joc, index, jucator):
+            if stare_joc.doua_din_trei(index, jucator):
                 print("removed by categ1")
                 stare_joc.piese_tabla[index] = 0
                 return stare_joc
@@ -292,24 +227,7 @@ def indepartare_piesa(stare_joc: StareJoc, jucator):
     return stare_joc
 
 
-def vecinatati_libere(stare_joc, index):
-    index_piesa_dreapta = stare_joc.get_index_dreapta(index)
-    index_piesa_stanga = stare_joc.get_index_stanga(index)
-    index_piesa_sus = stare_joc.get_index_sus(index)
-    index_piesa_jos = stare_joc.get_index_jos(index)
 
-    vecini = []
-
-    if index_piesa_stanga != -1 and stare_joc.piese_tabla[index_piesa_stanga] == 0:
-        vecini.append(index_piesa_stanga)
-    if index_piesa_dreapta != -1 and stare_joc.piese_tabla[index_piesa_dreapta] == 0:
-        vecini.append(index_piesa_dreapta)
-    if index_piesa_sus != -1 and stare_joc.piese_tabla[index_piesa_sus] == 0:
-        vecini.append(index_piesa_sus)
-    if index_piesa_jos != -1 and stare_joc.piese_tabla[index_piesa_jos] == 0:
-        vecini.append(index_piesa_jos)
-
-    return vecini
 
 
 def stari_posibile_muta_piese(stare_joc_parinte, jucator, max_depth, depth):
@@ -321,7 +239,7 @@ def stari_posibile_muta_piese(stare_joc_parinte, jucator, max_depth, depth):
 
     for index, valoare in enumerate(piese_tabla):
         if valoare == jucator:
-            mutari_piesa = vecinatati_libere(aux_stare_joc_parinte, index)
+            mutari_piesa = aux_stare_joc_parinte.vecinatati_libere(index)
             for mutare in mutari_piesa:
                 # if mutare != -1 and piese_tabla[mutare] == 0:
                 aux_piese_tabla = copy.deepcopy(piese_tabla)

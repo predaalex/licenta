@@ -619,14 +619,20 @@ class PyWindow:
                 [sg.Frame("Select the engine ai will use",
                  [[sg.Combo(["Alpha-Beta", "Min-Max"], default_value="Alpha-Beta", key="-AI-ALGORITHM-")]])],
                 [sg.Frame("Select the heuristic ai will use",
-                 [[sg.Combo(["Number of closed morrises",
-                             "Difference between the number of yours and yours opponent’s morrises"],
+                 [[sg.Combo(["Last move is morris",
+                             "Number of closed morrises",
+                             "Number of blocked opponent pieces",
+                             "Difference between the number of yours and yours opponent’s morrises",
+                             "Number of 2 piece configurations",
+                             "Number of Double morris",
+                             "Winning configuration",
+                             "Best heuristic"],
                             default_value="Number of closed morrises", key="-AI-HEURISTIC-")]])],
                 [sg.Frame("Min-Max | Alpha-Beta parameters",
                  [[sg.Text("Depth of ai putting pieces"),
-                   sg.Slider(range=(1, 15), key="-AI_DEPTH_PUT-", orientation='v', size=(5, 20), default_value=3),
+                   sg.Slider(range=(1, 15), key="-AI_DEPTH_PUT-", orientation='v', size=(5, 20), default_value=5),
                    sg.Text("Depth of ai moving pieces"),
-                   sg.Slider(range=(1, 21), key="-AI_DEPTH_MOVE-", orientation='v', size=(5, 20), default_value=3)]])]
+                   sg.Slider(range=(1, 21), key="-AI_DEPTH_MOVE-", orientation='v', size=(5, 20), default_value=7)]])]
                 ]
 
 

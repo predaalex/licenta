@@ -456,16 +456,19 @@ class StareJoc:
         else:
             return False
 
-    def get_index_sus(self, index):
+    @staticmethod
+    def get_index_sus(index):
         return above_arr[index]
 
-    def get_index_jos(self, index):
+    @staticmethod
+    def get_index_jos(index):
         try:
             return above_arr.index(index)
         except ValueError:
             return -1
 
-    def get_index_stanga(self, index):
+    @staticmethod
+    def get_index_stanga(index):
         if index == -1:
             return -1
         if index % 3 == 0:
@@ -473,7 +476,8 @@ class StareJoc:
         else:
             return index - 1
 
-    def get_index_dreapta(self, index):
+    @staticmethod
+    def get_index_dreapta(index):
         if index == -1:
             return -1
         if index % 3 == 2:
@@ -613,6 +617,25 @@ class StareJoc:
         else:
             return False
 
+    def vecinatati_libere(self, index):
+        index_piesa_dreapta = self.get_index_dreapta(index)
+        index_piesa_stanga = self.get_index_stanga(index)
+        index_piesa_sus = self.get_index_sus(index)
+        index_piesa_jos = self.get_index_jos(index)
+
+        vecini = []
+
+        if index_piesa_stanga != -1 and self.piese_tabla[index_piesa_stanga] == 0:
+            vecini.append(index_piesa_stanga)
+        if index_piesa_dreapta != -1 and self.piese_tabla[index_piesa_dreapta] == 0:
+            vecini.append(index_piesa_dreapta)
+        if index_piesa_sus != -1 and self.piese_tabla[index_piesa_sus] == 0:
+            vecini.append(index_piesa_sus)
+        if index_piesa_jos != -1 and self.piese_tabla[index_piesa_jos] == 0:
+            vecini.append(index_piesa_jos)
+
+        return vecini
+
     def check_castigator(self, jucator):
         # pentru ca un jucator sa castige trebuie ca :
         # celalalt jucator sa aiba mai putin de 2 piese
@@ -624,41 +647,13 @@ class StareJoc:
         if jucator == self.JMAX and self.JMIN_num_piese < 3:
             return True
 
-        # print("============")
-        # for index, piese in enumerate(self.piese_tabla):
-        #     print(f"index = {index} -> piesa={piese}")
-        # print("============")
-        numar_piese = 0
         # daca inamicul poate are o mutare valabila, inseamna ca nu este castigator
         for pos, piesa_jucator in enumerate(self.piese_tabla):
-            if piesa_jucator == jucator * (-1):
-                numar_piese = 0
-                # daca toate 4 directiile sunt blocate => piesa blocata
-                counter = 0
-                poz_posibile = 4
-                if self.get_index_stanga(pos) == -1:
-                    poz_posibile -= 1
-                elif self.piese_tabla[self.get_index_stanga(pos)] != 0:
-                    counter += 1
-                if self.get_index_dreapta(pos) == -1:
-                    poz_posibile -= 1
-                elif self.piese_tabla[self.get_index_dreapta(pos)] != 0:
-                    counter += 1
-                if self.get_index_sus(pos) == -1:
-                    poz_posibile -= 1
-                elif self.piese_tabla[self.get_index_sus(pos)] != 0:
-                    counter += 1
-                if self.get_index_jos(pos) == -1:
-                    poz_posibile -= 1
-                elif self.piese_tabla[self.get_index_jos(pos)] != 0:
-                    counter += 1
-                # print(f"index {pos}, poz_pos {poz_posibile} -> counter {counter}")  # debug
-                if counter < poz_posibile:
+            if piesa_jucator == -jucator:
+                if len(self.vecinatati_libere(pos)) != 0:
                     return False
-        if numar_piese == 0:
-            return False
-        else:
-            return True
+
+        return True
 
     def mutari_libere(self):
         pozitii_libere = []
@@ -668,30 +663,203 @@ class StareJoc:
         return pozitii_libere
 
     def estimare_scor(self, depth, jucator, heuristic):
-        if self.check_castigator(jucator):
-            return 999
-        if self.check_castigator(-jucator):
-            return -999
+        # number of pieces in morris
+        enemy_pieces_in_morris, player_prices_in_morris = self.calculeaza_piese_in_moara(jucator)
 
-        scor = 0
-        if heuristic == "Number of closed morrises":
-            for index, valoare in enumerate(self.piese_tabla):
-                if valoare == jucator:
-                    if self.check_moara(index, jucator):
-                        scor += 1
+
+        # ( 1 )
+        # Closed Morris:
+        # 1 if a morris was closed in the last move by the player
+        # -1 if a morris was closed by the opponent in the last move,
+        # 0 otherwise
+        if heuristic == "Last move is morris":
+            return self.last_move_is_morris(jucator)
+
+
+        # ( 2 )
+        # Number of Morrises:
+        # Difference between the number of yours and yours opponent’s morrises
+        elif heuristic == "Number of closed morrises":
+            return self.scor_closed_morrises(jucator)
+
+        # ( 3 )
+        # Number of blocked opponent pieces:
+        # Difference between the number of yours opponent’s and yours blocked pieces (pieces which don’t have an empty adjacent point)
+        elif heuristic == "Number of blocked opponent pieces":
+            return self.scor_blocked_pieces(jucator)
+
+        # ( random )
+        elif heuristic == "Difference between the number of yours and yours opponent’s morrises":
+            return player_prices_in_morris - enemy_pieces_in_morris
+
+        # ( 5 )
+        # Number of 2 piece configurations:
+        # Difference between the number of yours and yours opponent’s 2 piece configurations
+        # (A 2-piece configuration is one to which adding one more piece would close a morris)
+        elif heuristic == "Number of 2 piece configurations":
+            return self.scor_2piece_configurations(jucator)
+
+        # ( 7 )
+        # Double morris:
+        # Difference between number of yours and yours opponent’s double morrises
+        # (A double morris is one in which two morrises share a common piece)
+        elif heuristic == "Number of Double morris":
+            return self.scor_double_morris(enemy_pieces_in_morris, player_prices_in_morris)
+
+        # ( 8 )
+        # Winning configuration:
+        # 1 if the state is winning for the player
+        # -1 if losing
+        # 0 otherwise
+        elif heuristic == "Winning configuration":
+            return self.scor_winning_configuration(jucator)
+
+        if heuristic == "Best heuristic":
+            scor = 0
+            scor += 14 * self.last_move_is_morris(jucator)
+            scor += 43 * self.scor_closed_morrises(jucator)
+            scor += 10 * self.scor_blocked_pieces(jucator)
+            scor += 8 * self.scor_double_morris(enemy_pieces_in_morris, player_prices_in_morris)
+            scor += 1086 * self.scor_winning_configuration(jucator)
             return scor
+    def scor_blocked_pieces(self, jucator):
+        player_blocked_pieces = 0
+        enemy_blocked_pieces = 0
+        for index, val in enumerate(self.piese_tabla):
+            if val != 0:
+                if len(self.vecinatati_libere(index)) == 0:
+                    if val == jucator:
+                        player_blocked_pieces += 1
+                    elif val == -jucator:
+                        enemy_blocked_pieces += 1
+        return enemy_blocked_pieces - player_blocked_pieces
 
-        player_counter = 0  # number of morris
-        enemy_counter = 0
-        if heuristic == "Difference between the number of yours and yours opponent’s morrises":
-            for index, valoare in enumerate(self.piese_tabla):
-                if valoare == jucator:
-                    if self.check_moara(index, jucator):
-                        player_counter += 1
-                elif valoare == -jucator:
-                    if self.check_moara(index, -jucator):
-                        enemy_counter += 1
-            return player_counter - enemy_counter
+    def scor_closed_morrises(self, jucator):
+        player_morrises = 0
+        enemy_morrises = 0
+        for index, valoare in enumerate(self.piese_tabla):
+            if valoare == jucator:
+                if self.check_moara(index, jucator):
+                    player_morrises += 1
+            elif valoare == -jucator:
+                if self.check_moara(index, -jucator):
+                    enemy_morrises += 1
+        return player_morrises - enemy_morrises
+
+    def scor_2piece_configurations(self, jucator):
+        player_2piece_configurations = 0
+        enemy_2piece_configurations = 0
+        for index, val in enumerate(self.piese_tabla):
+            if self.doua_din_trei(index, jucator):
+                player_2piece_configurations += 1
+            elif self.doua_din_trei(index, -jucator):
+                enemy_2piece_configurations += 1
+        if player_2piece_configurations != 0:
+            player_2piece_configurations /= 2
+        if enemy_2piece_configurations != 0:
+            enemy_2piece_configurations /= 2
+        return player_2piece_configurations - enemy_2piece_configurations
+
+    @staticmethod
+    def scor_double_morris(enemy_counter_pieces_in_morris, player_counter_pieces_in_morris):
+        scor = 0
+        if player_counter_pieces_in_morris == 5:
+            scor += 1
+        if enemy_counter_pieces_in_morris == 5:
+            scor -= 1
+        return scor
+
+    def scor_winning_configuration(self, jucator):
+        if self.check_castigator(jucator):
+            return 1
+        elif self.check_castigator(-jucator):
+            return -1
+        else:
+            return 0
+
+    def calculeaza_piese_in_moara(self, jucator):
+        enemy_counter_pieces_in_morris = 0
+        player_counter_pieces_in_morris = 0
+        for index, valoare in enumerate(self.piese_tabla):
+            if valoare == jucator:
+                if self.check_moara(index, jucator):
+                    player_counter_pieces_in_morris += 1
+            elif valoare == -jucator:
+                if self.check_moara(index, -jucator):
+                    enemy_counter_pieces_in_morris += 1
+        return enemy_counter_pieces_in_morris, player_counter_pieces_in_morris
+
+    def last_move_is_morris(self, jucator):
+        if self.check_moara(self.index_move, jucator):
+            return 1
+        elif self.check_moara(self.index_move, -jucator):
+            return -1
+        else:
+            return 0
+
+    def doua_din_trei(self, index, jucator):
+        index_piesa_dreapta = self.get_index_dreapta(index)
+        index_piesa_dreapta_dreapta = self.get_index_dreapta(self.get_index_dreapta(index))
+        index_piesa_stanga = self.get_index_stanga(index)
+        index_piesa_stanga_stanga = self.get_index_stanga(self.get_index_stanga(index))
+        index_piesa_sus = self.get_index_sus(index)
+        index_piesa_sus_sus = self.get_index_sus(self.get_index_sus(index))
+        index_piesa_jos = self.get_index_jos(index)
+        index_piesa_jos_jos = self.get_index_jos(self.get_index_jos(index))
+
+        # pe linie in colturi
+        # stanga
+        if index_piesa_stanga != -1 and self.piese_tabla[index_piesa_stanga] == jucator and \
+                index_piesa_stanga_stanga != -1 and self.piese_tabla[index_piesa_stanga_stanga] == 0:
+            return True
+        # dreapta
+        if index_piesa_dreapta != -1 and self.piese_tabla[index_piesa_dreapta] == jucator and \
+                index_piesa_dreapta_dreapta != -1 and self.piese_tabla[index_piesa_dreapta_dreapta] == 0:
+            return True
+        # pe linie pe mijloc si stanga
+        if index_piesa_stanga != -1 and self.piese_tabla[index_piesa_stanga] == jucator and \
+                index_piesa_dreapta != -1 and self.piese_tabla[index_piesa_dreapta] == 0:
+            return True
+        # pe linie pe mijloc si dreapta
+        if index_piesa_dreapta != - 1 and self.piese_tabla[index_piesa_dreapta] == jucator and \
+                index_piesa_stanga != -1 and self.piese_tabla[index_piesa_stanga] == 0:
+            return True
+        # pe linie in colturi
+        if index_piesa_dreapta != -1 and self.piese_tabla[index_piesa_dreapta] == 0 and \
+                index_piesa_dreapta_dreapta != -1 and self.piese_tabla[index_piesa_dreapta_dreapta] == jucator:
+            return True
+        # pe linie in colturi
+        if index_piesa_stanga != -1 and self.piese_tabla[index_piesa_stanga] == 0 and \
+                index_piesa_stanga_stanga != -1 and self.piese_tabla[index_piesa_stanga_stanga] == jucator:
+            return True
+
+        # pe coloana in colturi
+        # sus
+        if index_piesa_jos != -1 and self.piese_tabla[index_piesa_jos] == jucator and \
+                index_piesa_jos_jos != -1 and self.piese_tabla[index_piesa_jos_jos] == 0:
+            return True
+        # jos
+        if index_piesa_sus != -1 and self.piese_tabla[index_piesa_sus] == jucator and \
+                index_piesa_sus_sus != -1 and self.piese_tabla[index_piesa_sus_sus] == 0:
+            return True
+        # pe coloana pe mijloc si sus
+        if index_piesa_sus != -1 and self.piese_tabla[index_piesa_sus] == jucator and \
+                index_piesa_jos_jos != -1 and self.piese_tabla[index_piesa_jos_jos] == 0:
+            return True
+        # pe coloana pe mijloc si jos
+        if index_piesa_jos != -1 and self.piese_tabla[index_piesa_jos] == jucator and \
+                index_piesa_sus_sus != -1 and self.piese_tabla[index_piesa_sus_sus] == 0:
+            return True
+        # pe coloana sus si jos
+        if index_piesa_sus != -1 and self.piese_tabla[index_piesa_sus] == 0 and \
+                index_piesa_sus_sus != -1 and self.piese_tabla[index_piesa_sus_sus] == jucator:
+            return True
+        # pe coloana jos si sus
+        if index_piesa_jos != -1 and self.piese_tabla[index_piesa_jos] == 0 and \
+                index_piesa_jos_jos != -1 and self.piese_tabla[index_piesa_jos_jos] == jucator:
+            return True
+
+        return False
 
     def get_configuratie_from_camera_screenshot(self):
         # print("get_configuratie_from_camera_screenshot")

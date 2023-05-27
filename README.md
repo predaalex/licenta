@@ -1,8 +1,9 @@
-# licenta
+# Licenta
 - [x] de implementat alpha beta
 - [x] de facut in meniu optiunea de a alege engine-ul si de adaugat functionalitatea
-- [ ] de facut cele 9 tipuri de euristici si sa fac un "campionat" intre ele
-- [ ] de facut optiuni in meniu pentru a alege erustica dorita
+- [x] de facut cele 9 tipuri de euristici 
+- [x] de facut optiuni in meniu pentru a alege erustica dorita
+- [ ] sa fac un "campionat" intre ele
 - [ ] de (incercat) implementarea de RL
 
 1. introducere: prezint cum este structurata licenta, arat cititorului ce este gasit in licenta, 
