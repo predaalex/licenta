@@ -3,11 +3,11 @@
 - [x] de facut in meniu optiunea de a alege engine-ul si de adaugat functionalitatea
 - [x] de facut cele 9 tipuri de euristici 
 - [x] de facut optiuni in meniu pentru a alege erustica dorita
-- [ ] sa fac un "campionat" intre ele
+- [x] sa fac un "campionat" intre ele
 - [ ] de (incercat) implementarea de RL
 
 1. introducere: prezint cum este structurata licenta, arat cititorului ce este gasit in licenta, 
-cum a fost abordate problemele
+cum au fost abordate problemele
 2. prezentare jocului: reguli, cum se joaca, cadre care reprezinta mutari valide si invalide
 3. prezint cum functioneaza partea de cv(sync)
 4. prezint minimaxul & alpha beta

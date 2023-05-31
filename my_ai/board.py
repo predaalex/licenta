@@ -45,14 +45,14 @@ def alignImages(im1, im2):
     im2Gray = cv.cvtColor(im2, cv.COLOR_BGR2GRAY)
 
     # Detect AKAZE featyres and compute descriptors
-    akaze = cv.AKAZE_create()
-    keypoints1, descriptors1 = akaze.detectAndCompute(im1Gray, None)
-    keypoints2, descriptors2 = akaze.detectAndCompute(im2Gray, None)
+    # akaze = cv.AKAZE_create()
+    # keypoints1, descriptors1 = akaze.detectAndCompute(im1Gray, None)
+    # keypoints2, descriptors2 = akaze.detectAndCompute(im2Gray, None)
 
-    # Detect ORB features and compute descriptors.
-    # sift = cv.xfeatures2d.SIFT_create(MAX_MATCHES)
-    # keypoints1, descriptors1 = sift.detectAndCompute(im1Gray, None)
-    # keypoints2, descriptors2 = sift.detectAndCompute(im2Gray, None)
+    # Detect SIFT features and compute descriptors.
+    sift = cv.xfeatures2d.SIFT_create(nfeatures=MAX_MATCHES)
+    keypoints1, descriptors1 = sift.detectAndCompute(im1Gray, None)
+    keypoints2, descriptors2 = sift.detectAndCompute(im2Gray, None)
 
     # orb = cv.ORB_create(MAX_MATCHES)
     # keypoints1, descriptors1 = orb.detectAndCompute(im1Gray, None)
@@ -241,10 +241,13 @@ class StareJoc:
 
         # punem piesele pe tabla
         for i in range(0, len(self.piese_tabla)):
+            centrul_pozitiei = [coord_arr['x'][i], coord_arr['y'][i]]
+            pygame.draw.circle(surface=self.window, color=(0, 0, 0),
+                               center=[x * self.scala_imaginii for x in centrul_pozitiei],
+                               radius=13)
             # verificam daca exista piesa
             if self.piese_tabla[i] != 0:
                 # pozitia in imagine
-                centrul_pozitiei = [coord_arr['x'][i], coord_arr['y'][i]]
                 # verificam cui ii apartine piesa si o desena
                 if self.piese_tabla[i] > 0:
                     pygame.draw.circle(surface=self.window, color=self.culoare_jucator1,

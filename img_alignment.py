@@ -12,14 +12,14 @@ def alignImages(im1, im2):
     im2Gray = cv.cvtColor(im2, cv.COLOR_BGR2GRAY)
 
     # Detect AKAZE featyres and compute descriptors
-    akaze = cv.AKAZE_create()
-    keypoints1, descriptors1 = akaze.detectAndCompute(im1Gray, None)
-    keypoints2, descriptors2 = akaze.detectAndCompute(im2Gray, None)
+    # akaze = cv.AKAZE_create()
+    # keypoints1, descriptors1 = akaze.detectAndCompute(im1Gray, None)
+    # keypoints2, descriptors2 = akaze.detectAndCompute(im2Gray, None)
 
     # Detect ORB features and compute descriptors.
-    # sift = cv.xfeatures2d.SIFT_create(MAX_MATCHES)
-    # keypoints1, descriptors1 = sift.detectAndCompute(im1Gray, None)
-    # keypoints2, descriptors2 = sift.detectAndCompute(im2Gray, None)
+    sift = cv.xfeatures2d.SIFT_create(nfeatures=MAX_MATCHES)
+    keypoints1, descriptors1 = sift.detectAndCompute(im1Gray, None)
+    keypoints2, descriptors2 = sift.detectAndCompute(im2Gray, None)
 
     # orb = cv.ORB_create(MAX_MATCHES)
     # keypoints1, descriptors1 = orb.detectAndCompute(im1Gray, None)

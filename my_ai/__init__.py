@@ -627,7 +627,7 @@ class PyWindow:
                              "Number of Double morris",
                              "Winning configuration",
                              "Best heuristic"],
-                            default_value="Number of closed morrises", key="-AI-HEURISTIC-")]])],
+                            default_value="Best heuristic", key="-AI-HEURISTIC-")]])],
                 [sg.Frame("Min-Max | Alpha-Beta parameters",
                  [[sg.Text("Depth of ai putting pieces"),
                    sg.Slider(range=(1, 15), key="-AI_DEPTH_PUT-", orientation='v', size=(5, 20), default_value=5),
