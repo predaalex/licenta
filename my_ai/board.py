@@ -128,8 +128,8 @@ class StareJoc:
         self.culoare_jucator2 = None
         self.culoare_jucator1 = None
         self.piese_tabla = None
-        self.JMAX_num_piese = None
-        self.JMIN_num_piese = None
+        self.JMAX_num_piese = 0
+        self.JMIN_num_piese = 0
         self.JMIN = -1
         self.JMAX = 1
         self.window = None
@@ -161,8 +161,8 @@ class StareJoc:
         else:
             self.piese_tabla = tabla
         # self.piese_tabla = np.random.choice([-1, 0, 1], size=24)  # date de test random
-        self.JMIN_num_piese = 9  # numarul de piese al jucatorului
-        self.JMAX_num_piese = 9
+        self.JMIN_num_piese = 0  # numarul de piese al jucatorului
+        self.JMAX_num_piese = 0
 
     def init_GUI(self):
         # Facem threadul care tine tabla updatata
@@ -510,6 +510,11 @@ class StareJoc:
             self.piese_tabla[index_pos] = jucator
             print("Piesa a fost pusa cu succes")
 
+            if jucator == self.JMIN:
+                self.JMIN_num_piese += 1
+            elif jucator == self.JMAX:
+                self.JMAX_num_piese += 1
+
             # verificam daca piesa pusa formeaza o moara
             if self.check_moara(index_pos, jucator):
                 print("Piesa formeaza o moara")
@@ -719,11 +724,11 @@ class StareJoc:
 
         if heuristic == "Best heuristic":
             scor = 0
-            scor += 20 * self.last_move_is_morris(jucator)
+            scor += 14 * self.last_move_is_morris(jucator)
             scor += 43 * self.scor_closed_morrises(jucator)
             scor += 10 * self.scor_blocked_pieces(jucator)
             scor += 8 * self.scor_double_morris(enemy_pieces_in_morris, player_prices_in_morris)
-            scor += 1086 * self.scor_winning_configuration(jucator)
+            scor += 1000 * self.scor_winning_configuration(jucator)
             return scor
     def scor_blocked_pieces(self, jucator):
         player_blocked_pieces = 0

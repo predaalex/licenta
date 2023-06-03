@@ -58,6 +58,8 @@ def HumanVsAI():
 
         print("ai-ul a pus o piesa")
 
+        joc.JMAX_num_piese += 1
+
         # Daca ai-ul face o moara, sa elimine o piese a adversarului
         if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara ")  # DEBUG
@@ -213,6 +215,8 @@ def AIVsAI():
             urmatoarea_stare = urmatoarea_stare.parinte
         print("ai-ul a pus o piesa")
 
+        joc.JMIN_num_piese += 1
+
         # Daca ai-ul face o moara, sa elimine o piese a adversarului
         if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara ")  # DEBUG
@@ -239,6 +243,8 @@ def AIVsAI():
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
         print("ai-ul a pus o piesa")
+
+        joc.JMAX_num_piese += 1
 
         # Daca ai-ul face o moara, sa elimine o piese a adversarului
         if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
@@ -416,6 +422,9 @@ def HumanVsAI_Camera():
         while urmatoarea_stare.parinte is not None:
             urmatoarea_stare = urmatoarea_stare.parinte
         print("ai-ul a pus o piesa")
+
+        joc.JMAX_num_piese += 1
+
         # Daca ai-ul face o moara, sa elimine o piese a adversarului
         if not joc.end and urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara ")  # DEBUG
@@ -448,6 +457,7 @@ def HumanVsAI_Camera():
             else:
                 print("configuratia nu este valida, pune piesa corect")
         print("Piesa a fost pusa cu succes")
+        joc.JMIN_num_piese += 1
         joc.piese_tabla = configuratie_camera
         joc_aux = joc
         # verificam daca piesa pusa se afla intr-o moara
@@ -647,7 +657,7 @@ class PyWindow:
                                                  "Number of Double morris",
                                                  "Winning configuration",
                                                  "Best heuristic"],
-                                                default_value="Best heuristic", key="-AI-SECOND-HEURISTIC-")]])],
+                                                default_value="Last move is morris", key="-AI-SECOND-HEURISTIC-")]])],
                            [sg.Frame("Min-Max | Alpha-Beta parameters",
                                      [[sg.Text("Depth of ai putting pieces"),
                                        sg.Slider(range=(1, 15), key="-AI-SECOND-DEPTH_PUT-", orientation='v',

@@ -35,7 +35,13 @@ def min_max_pune_piese(stare_joc: StareJoc, heuristic, jucator_initial, jucator,
         stare_joc.estimare = stare_joc.estimare_scor(depth, jucator_initial, heuristic)
         return stare_joc
 
-    stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
+    stari = []
+    if jucator == stare_joc.JMIN and stare_joc.JMIN_num_piese < 9:
+        stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
+    elif jucator == stare_joc.JMAX and stare_joc.JMAX_num_piese < 9:
+        stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
+    else:
+        stari = stari_posibile_muta_piese(stare_joc, jucator, max_depth, depth)
 
     mutari_cu_estimare = [min_max_pune_piese(stare, heuristic, jucator_initial, -jucator, max_depth, depth - 1) for stare in stari]
 
@@ -60,7 +66,14 @@ def alpha_beta_pune_piesa(stare_joc: StareJoc, heuristic, jucator_initial, jucat
     if alpha > beta:
         return stare_joc  # este intr-un interval valid deci nu o mai procesez
 
-    stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
+    stari = []
+    if jucator == stare_joc.JMIN and stare_joc.JMIN_num_piese < 9:
+        stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
+    elif jucator == stare_joc.JMAX and stare_joc.JMAX_num_piese < 9:
+        stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
+    else:
+        stari = stari_posibile_muta_piese(stare_joc, jucator, max_depth, depth)
+
     best_move = []
 
     if jucator == jucator_initial:
@@ -170,6 +183,8 @@ def alpha_beta_muta_piesa(stare_joc: StareJoc, heuristic, jucator_initial, jucat
 def stari_posibile_pune_piese(stare_joc_parinte, jucator, max_depth, depth):
     configuratii_posibile = []
     piese_tabla = stare_joc_parinte.piese_tabla
+    JMIN_piese = stare_joc_parinte.JMIN_num_piese
+    JMAX_piese = stare_joc_parinte.JMAX_num_piese
 
     if depth == max_depth:
         stare_joc_parinte = None
@@ -178,9 +193,17 @@ def stari_posibile_pune_piese(stare_joc_parinte, jucator, max_depth, depth):
         if valoare == 0:
             aux_piese_tabla = copy.deepcopy(piese_tabla)
             aux_piese_tabla[index] = jucator
-            configuratii_posibile.append(
-                StareJoc(tabla=aux_piese_tabla, GUI=False, parinte=stare_joc_parinte, index_move=index)
-            )
+
+            stare_noua = StareJoc(tabla=aux_piese_tabla, GUI=False, parinte=stare_joc_parinte, index_move=index)
+            stare_noua.JMIN_num_piese = JMIN_piese
+            stare_noua.JMAX_num_piese = JMAX_piese
+
+            if jucator == stare_noua.JMIN:
+                stare_noua.JMIN_num_piese += 1
+            elif jucator == stare_noua.JMAX:
+                stare_noua.JMAX_num_piese += 1
+
+            configuratii_posibile.append(stare_noua)
 
     return configuratii_posibile
 
