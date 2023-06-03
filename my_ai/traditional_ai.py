@@ -5,7 +5,7 @@ from board import StareJoc
 
 def min_max_muta_piese(stare_joc: StareJoc, heuristic, jucator_initial, jucator, max_depth=3, depth=3):
     if depth <= 0:
-        stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator, heuristic)
+        stare_joc.estimare = stare_joc.estimare_scor(depth, jucator_initial, heuristic)
         return stare_joc
 
     stari = stari_posibile_muta_piese(stare_joc, jucator, max_depth, depth)
@@ -32,7 +32,7 @@ def min_max_muta_piese(stare_joc: StareJoc, heuristic, jucator_initial, jucator,
 def min_max_pune_piese(stare_joc: StareJoc, heuristic, jucator_initial, jucator, max_depth=3, depth=3):
     # configuratie_tabla_rezultata = np.random.choice([-1, 0, 1], size=24)  # date de test random
     if depth <= 0:
-        stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator, heuristic)
+        stare_joc.estimare = stare_joc.estimare_scor(depth, jucator_initial, heuristic)
         return stare_joc
 
     stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
@@ -54,7 +54,7 @@ def min_max_pune_piese(stare_joc: StareJoc, heuristic, jucator_initial, jucator,
 
 def alpha_beta_pune_piesa(stare_joc: StareJoc, heuristic, jucator_initial, jucator, alpha, beta, max_depth=3, depth=3):
     if depth <= 0:
-        stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator, heuristic)
+        stare_joc.estimare = stare_joc.estimare_scor(depth, jucator_initial, heuristic)
         return stare_joc
 
     if alpha > beta:
@@ -63,7 +63,7 @@ def alpha_beta_pune_piesa(stare_joc: StareJoc, heuristic, jucator_initial, jucat
     stari = stari_posibile_pune_piese(stare_joc, jucator, max_depth, depth)
     best_move = []
 
-    if jucator == stare_joc.JMAX:
+    if jucator == jucator_initial:
         estimare_curenta = float('-inf')
 
         for mutare in stari:
@@ -84,7 +84,7 @@ def alpha_beta_pune_piesa(stare_joc: StareJoc, heuristic, jucator_initial, jucat
                 if alpha >= beta:
                     break
 
-    elif jucator == stare_joc.JMIN:
+    elif jucator == -jucator_initial:
         estimare_curenta = float('inf')
 
         for mutare in stari:
@@ -112,7 +112,7 @@ def alpha_beta_pune_piesa(stare_joc: StareJoc, heuristic, jucator_initial, jucat
 
 def alpha_beta_muta_piesa(stare_joc: StareJoc, heuristic, jucator_initial, jucator, alpha, beta, max_depth=3, depth=3):
     if depth <= 0:
-        stare_joc.estimare = stare_joc.estimare_scor(depth, -jucator, heuristic)
+        stare_joc.estimare = stare_joc.estimare_scor(depth, jucator_initial, heuristic)
         return stare_joc
 
     if alpha > beta:

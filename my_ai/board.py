@@ -719,7 +719,7 @@ class StareJoc:
 
         if heuristic == "Best heuristic":
             scor = 0
-            scor += 14 * self.last_move_is_morris(jucator)
+            scor += 20 * self.last_move_is_morris(jucator)
             scor += 43 * self.scor_closed_morrises(jucator)
             scor += 10 * self.scor_blocked_pieces(jucator)
             scor += 8 * self.scor_double_morris(enemy_pieces_in_morris, player_prices_in_morris)
@@ -882,6 +882,7 @@ class StareJoc:
              img_aliniata[210:260, 93:143, :], img_aliniata[210:260, 150:200, :], img_aliniata[210:260, 215:265, :],
              img_aliniata[255:305, 50:100, :], img_aliniata[255:305, 150:200, :], img_aliniata[255:305, 250:300, :],
              img_aliniata[300:350, 0:50, :], img_aliniata[300:350, 150:200, :], img_aliniata[300:350, 300:350, :]]
+
         configuratie_camera = []
         for img in lista_imagini_pozitii:
             label = self.model.predict(self.image_to_resnet_descriptors(img))
