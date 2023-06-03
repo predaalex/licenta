@@ -182,7 +182,7 @@ def alpha_beta_muta_piesa(stare_joc: StareJoc, heuristic, jucator_initial, jucat
     return random.choice(best_move)
 
 
-def stari_posibile_pune_piese(stare_joc_parinte, jucator, max_depth, depth):
+def stari_posibile_pune_piese(stare_joc_parinte, jucator, max_depth, depth, camera=False):
     configuratii_posibile = []
     piese_tabla = stare_joc_parinte.piese_tabla
     JMIN_piese = stare_joc_parinte.JMIN_num_piese
@@ -205,12 +205,19 @@ def stari_posibile_pune_piese(stare_joc_parinte, jucator, max_depth, depth):
             elif jucator == stare_noua.JMAX:
                 stare_noua.JMAX_num_piese += 1
 
+            if not camera and stare_noua.check_moara(index, jucator):
+                indepartare_piesa(stare_noua, jucator)
+                if jucator == stare_noua.JMAX:
+                    stare_noua.JMIN_num_piese -= 1
+                else:
+                    stare_noua.JMAX_num_piese -= 1
+
             configuratii_posibile.append(stare_noua)
 
     return configuratii_posibile
 
 
-def stari_posibile_muta_piese(stare_joc_parinte, jucator, max_depth, depth):
+def stari_posibile_muta_piese(stare_joc_parinte, jucator, max_depth, depth, camera=False):
     configuratii_posibile = []
     piese_tabla = stare_joc_parinte.piese_tabla
     aux_stare_joc_parinte = StareJoc(stare_joc_parinte.piese_tabla, False, None)
@@ -221,18 +228,27 @@ def stari_posibile_muta_piese(stare_joc_parinte, jucator, max_depth, depth):
         if valoare == jucator:
             mutari_piesa = aux_stare_joc_parinte.vecinatati_libere(index)
             for mutare in mutari_piesa:
-                # if mutare != -1 and piese_tabla[mutare] == 0:
                 aux_piese_tabla = copy.deepcopy(piese_tabla)
                 aux_piese_tabla[index] = 0
                 aux_piese_tabla[mutare] = jucator
-                configuratii_posibile.append(
-                    StareJoc(tabla=aux_piese_tabla, GUI=False, parinte=stare_joc_parinte, index_move=mutare)
-                )
+
+                stare_noua = StareJoc(tabla=aux_piese_tabla, GUI=False, parinte=stare_joc_parinte, index_move=mutare)
+
+                if not camera and stare_noua.check_moara(mutare, jucator):
+                    indepartare_piesa(stare_noua, jucator)
+                    if jucator == stare_noua.JMAX:
+                        stare_noua.JMIN_num_piese -= 1
+                    else:
+                        stare_noua.JMAX_num_piese -= 1
+
+                configuratii_posibile.append(stare_noua)
+
+
     return configuratii_posibile
 
 
 def indepartare_piesa(stare_joc: StareJoc, jucator):
-    jucator *= -1
+    adversar = -jucator
     # piesa adversarului eliminata va fi in urmatoarea ordine:
     # 1.daca sunt 2 piese aproape sa faca o moara
     # 2.o piesa singuratica
@@ -242,51 +258,34 @@ def indepartare_piesa(stare_joc: StareJoc, jucator):
 
     # 1. daca sunt 2 piese aproape sa faca o moara
     for index, piesa in enumerate(stare_joc.piese_tabla):
-        if piesa == jucator:
-            if stare_joc.doua_din_trei(index, jucator):
+        if piesa == adversar:
+            if stare_joc.doua_din_trei(index, adversar):
                 # print("removed by categ1")
                 stare_joc.piese_tabla[index] = 0
                 return stare_joc
 
-    # daca piesa este in moara, treci peste si cauta alta piesa
-    # 0 -> pozitia este goala
-    # 1 -> piesa este intr-o moara
-    # 2 -> piesa pe care sa o scoatem
+    # 2
     for index, piesa in enumerate(stare_joc.piese_tabla):
-        if piesa == jucator:
-            if stare_joc.check_moara(index, jucator):
-                categorii.append(3)
-            else:
-                categorii.append(2)
+        if piesa == adversar:
+            if len(stare_joc.vecinatati_libere(index)) == 0:
                 stare_joc.piese_tabla[index] = 0
-                # print("removed by categ2")
                 return stare_joc
-        else:
-            categorii.append(0)
 
-    try:
-        first_index = categorii.index(3)
-        stare_joc.piese_tabla[first_index] = 0
-        return stare_joc
-    except:
-        pass
+    # 3
+    lista_piese_adversar = piese_adversar(stare_joc, adversar)
 
-    try:
-        first_index = categorii.index(2)
-        stare_joc.piese_tabla[first_index] = 0
-        # print("removed by categ2")
-        return stare_joc
-    except:
-        first_index = np.where(stare_joc.piese_tabla == jucator)[0]
-        stare_joc.piese_tabla[first_index] = 0
+    if len(lista_piese_adversar) <= 0:
         return stare_joc
 
+    index = np.random.choice(lista_piese_adversar)
+    stare_joc.piese_tabla[index] = 0
+    return stare_joc
 
 
-def piese_adversar(stare_joc, jucator):
+def piese_adversar(stare_joc, adversar):
     indecsi_piesa = []
     for index, piesa in enumerate(stare_joc.piese_tabla):
-        if piesa == -jucator:
+        if piesa == adversar:
             indecsi_piesa.append(index)
     return indecsi_piesa
 

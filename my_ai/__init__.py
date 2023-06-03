@@ -35,7 +35,7 @@ def HumanVsAI():
         if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara")  # DEBUG
             joc.JMIN_num_piese -= 1
-            urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+            # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
         joc.piese_tabla = urmatoarea_stare.piese_tabla
         print("ai-ul a mutat o piesa")
@@ -65,7 +65,7 @@ def HumanVsAI():
             print("ai-ul a facut o moara ")  # DEBUG
             joc.JMIN_num_piese -= 1
 
-            urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+            # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
         joc.piese_tabla = urmatoarea_stare.piese_tabla
 
@@ -221,7 +221,7 @@ def AIVsAI():
         if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara ")  # DEBUG
             joc.JMAX_num_piese -= 1
-            urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+            # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
         joc.piese_tabla = urmatoarea_stare.piese_tabla
         print(f"mutarea a durat:{time.time() - move_time} s")
@@ -250,7 +250,7 @@ def AIVsAI():
         if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara ")  # DEBUG
             joc.JMIN_num_piese -= 1
-            urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+            # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
         joc.piese_tabla = urmatoarea_stare.piese_tabla
         print(f"mutarea a durat:{time.time() - move_time} s")
@@ -275,7 +275,7 @@ def AIVsAI():
         if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara ")  # DEBUG
             joc.JMAX_num_piese -= 1
-            urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+            # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
         joc.piese_tabla = urmatoarea_stare.piese_tabla
         print(f"mutarea a durat:{time.time() - move_time} s")
@@ -302,7 +302,7 @@ def AIVsAI():
         if urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara")  # DEBUG
             joc.JMIN_num_piese -= 1
-            urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+            # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
         joc.piese_tabla = urmatoarea_stare.piese_tabla
         print(f"mutarea a durat:{time.time() - move_time} s")
@@ -403,7 +403,7 @@ def HumanVsAI_Camera():
         if not joc.end and urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara ")  # DEBUG
             joc.JMIN_num_piese -= 1
-            urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+            # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
         joc.piese_tabla = urmatoarea_stare.piese_tabla
 
@@ -429,7 +429,7 @@ def HumanVsAI_Camera():
         if not joc.end and urmatoarea_stare.check_moara(urmatoarea_stare.index_move, jucator):
             print("ai-ul a facut o moara ")  # DEBUG
             joc.JMIN_num_piese -= 1
-            urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+            # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
 
         joc.piese_tabla = urmatoarea_stare.piese_tabla
 
@@ -439,7 +439,7 @@ def HumanVsAI_Camera():
         configuratie_valida = False
         configuratie_camera = []
         print(joc)
-        stari_posibile = traditional_ai.stari_posibile_pune_piese(joc, jucator, 1, 1)
+        stari_posibile = traditional_ai.stari_posibile_pune_piese(joc, jucator, 1, 1, True)
         index_mutare = -1
         while not configuratie_valida:
             configuratie_camera = board.get_configuratie_camera()
@@ -487,7 +487,7 @@ def HumanVsAI_Camera():
         # muta piesa
         configuratie_valida = False
         configuratie_camera = []
-        stari_posibile = traditional_ai.stari_posibile_muta_piese(joc, jucator, 1, 1)
+        stari_posibile = traditional_ai.stari_posibile_muta_piese(joc, jucator, 1, 1, True)
         index_mutare = -1
         while not configuratie_valida:
             configuratie_camera = board.get_configuratie_camera()
