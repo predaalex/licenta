@@ -1,5 +1,7 @@
 import copy
 import random
+import numpy as np
+
 from board import StareJoc
 
 
@@ -208,51 +210,6 @@ def stari_posibile_pune_piese(stare_joc_parinte, jucator, max_depth, depth):
     return configuratii_posibile
 
 
-def indepartare_piesa(stare_joc: StareJoc, jucator):
-    jucator *= -1
-    # piesa adversarului eliminata va fi in urmatoarea ordine:
-    # 1.daca sunt 2 piese aproape sa faca o moara
-    # 2.o piesa singuratica
-    # 3.o piesa random pentru ca toate piesele formeaza o moara
-
-    categorii = []  # lista cu categoriile fiacarei piese si -1 pt spatiu si piesa gresita
-
-    # 1. daca sunt 2 piese aproape sa faca o moara
-    for index, piesa in enumerate(stare_joc.piese_tabla):
-        if piesa == jucator:
-            if stare_joc.doua_din_trei(index, jucator):
-                print("removed by categ1")
-                stare_joc.piese_tabla[index] = 0
-                return stare_joc
-
-    # daca piesa este in moara, treci peste si cauta alta piesa
-    # 0 -> pozitia este goala
-    # 1 -> piesa e intr-o moara
-    # 2 -> piesa pe care sa o scoatem
-    for index, piesa in enumerate(stare_joc.piese_tabla):
-        if piesa == jucator:
-            if stare_joc.check_moara(index, jucator):
-                categorii.append(3)
-            else:
-                categorii.append(2)
-        else:
-            categorii.append(0)
-
-    for index, categ in enumerate(categorii):
-        if categ == 3:
-            stare_joc.piese_tabla[index] = 0
-            print("removed by categ3")
-            return stare_joc
-
-    first_index = categorii.index(2)
-    stare_joc.piese_tabla[first_index] = 0
-    print("removed by categ2")
-    return stare_joc
-
-
-
-
-
 def stari_posibile_muta_piese(stare_joc_parinte, jucator, max_depth, depth):
     configuratii_posibile = []
     piese_tabla = stare_joc_parinte.piese_tabla
@@ -272,6 +229,58 @@ def stari_posibile_muta_piese(stare_joc_parinte, jucator, max_depth, depth):
                     StareJoc(tabla=aux_piese_tabla, GUI=False, parinte=stare_joc_parinte, index_move=mutare)
                 )
     return configuratii_posibile
+
+
+def indepartare_piesa(stare_joc: StareJoc, jucator):
+    jucator *= -1
+    # piesa adversarului eliminata va fi in urmatoarea ordine:
+    # 1.daca sunt 2 piese aproape sa faca o moara
+    # 2.o piesa singuratica
+    # 3.o piesa random pentru ca toate piesele formeaza o moara
+
+    categorii = []  # lista cu categoriile fiacarei piese si -1 pt spatiu si piesa gresita
+
+    # 1. daca sunt 2 piese aproape sa faca o moara
+    for index, piesa in enumerate(stare_joc.piese_tabla):
+        if piesa == jucator:
+            if stare_joc.doua_din_trei(index, jucator):
+                # print("removed by categ1")
+                stare_joc.piese_tabla[index] = 0
+                return stare_joc
+
+    # daca piesa este in moara, treci peste si cauta alta piesa
+    # 0 -> pozitia este goala
+    # 1 -> piesa este intr-o moara
+    # 2 -> piesa pe care sa o scoatem
+    for index, piesa in enumerate(stare_joc.piese_tabla):
+        if piesa == jucator:
+            if stare_joc.check_moara(index, jucator):
+                categorii.append(3)
+            else:
+                categorii.append(2)
+                stare_joc.piese_tabla[index] = 0
+                # print("removed by categ2")
+                return stare_joc
+        else:
+            categorii.append(0)
+
+    try:
+        first_index = categorii.index(3)
+        stare_joc.piese_tabla[first_index] = 0
+        return stare_joc
+    except:
+        pass
+
+    try:
+        first_index = categorii.index(2)
+        stare_joc.piese_tabla[first_index] = 0
+        # print("removed by categ2")
+        return stare_joc
+    except:
+        first_index = np.where(stare_joc.piese_tabla == jucator)[0]
+        stare_joc.piese_tabla[first_index] = 0
+        return stare_joc
+
 
 
 def piese_adversar(stare_joc, jucator):
