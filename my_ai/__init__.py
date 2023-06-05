@@ -1,3 +1,4 @@
+import socket
 import sys
 import PySimpleGUI as sg
 import numpy as np
@@ -5,6 +6,109 @@ import pygame
 import board
 import traditional_ai
 import time
+
+
+def convert_stare_to_net_input(stare_joc: board.StareJoc, mutare_faza1, jucator):
+    # primele 24 de elemente sunt configuratia tablei urmate de 4 indici:
+    # moh -> number of my own pieces that are available to be placed on board
+    # eoh -> number of enemy pieces that are available to be placed on board
+    # mob -> number of own pieces that are placed on board
+    # eob -> number of enemy pieces that are placed on board
+    print(mutare_faza1)
+    # ordine moh, eoh, mob, eob
+    net_input = ""
+
+    for piese in stare_joc.piese_tabla:
+        if piese == 0:
+            net_input += "O"
+        elif piese == jucator:
+            net_input += "M"
+        elif piese == -jucator:
+            net_input += "E"
+
+    mob = eob = moh = eoh = 0
+    if jucator == stare_joc.JMAX:
+        mob = stare_joc.JMAX_num_piese
+        eob = stare_joc.JMIN_num_piese
+        moh = 9 - int(mutare_faza1 / 2)
+        eoh = moh - 1
+        if mutare_faza1 == -1:
+            moh = eoh = 0
+    else:
+        mob = stare_joc.JMIN_num_piese
+        eob = stare_joc.JMAX_num_piese
+        moh = 9 - int(mutare_faza1 / 2)
+        eoh = moh + 1
+        if mutare_faza1 == -1:
+            moh = eoh = 0
+
+    net_input += str(moh)
+    net_input += str(eoh)
+    net_input += str(mob)
+    net_input += str(eob)
+
+    # print(net_input)
+    return net_input
+
+
+def request_retea(stare, jucator):
+    ip = '127.0.0.1'
+    if jucator == joc.JMAX:
+        port = 5802
+    else:
+        port = 5803
+    # Create socket for server
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+
+    # Let's send data through UDP protocol
+    # while True:
+    s.sendto(stare.encode(), (ip, port))
+    print("1. Client Sent : ", stare)
+    data, address = s.recvfrom(4096)
+    print("2. Client received : ", data.decode())
+    # close the socket
+    s.close()
+
+    return data.decode()
+
+
+def RL_pune_piesa(i, joc, jucator):
+    input_retea = convert_stare_to_net_input(joc, i, jucator)
+    To_From_Remove = request_retea(input_retea, jucator)
+    to, fromm, remove = To_From_Remove.split(" ")
+    print(to, fromm, remove)
+    to, fromm, remove = int(to) - 1, int(fromm) - 1, int(remove) - 1
+
+    joc.piese_tabla[to] = jucator
+
+    print("RL a pus o piesa")
+
+    joc.JMAX_num_piese += 1
+
+    if joc.check_moara(to, jucator):
+        print("RL a facut o moara")
+        joc.piese_tabla[remove] = 0
+        joc.JMIN_num_piese -= 1
+
+
+def RL_muta_piesa(i, joc, jucator):
+    input_retea = convert_stare_to_net_input(joc, i, jucator)
+    To_From_Remove = request_retea(input_retea, jucator)
+    to, fromm, remove = To_From_Remove.split(" ")
+    print(to, fromm, remove)
+    to, fromm, remove = int(to) - 1, int(fromm) - 1, int(remove) - 1
+
+    joc.piese_tabla[fromm] = 0
+    joc.piese_tabla[to] = jucator
+
+    print("RL a pus o piesa")
+
+    joc.JMAX_num_piese += 1
+
+    if joc.check_moara(to, jucator):
+        print("RL a facut o moara")
+        joc.piese_tabla[remove] = 0
+        joc.JMIN_num_piese -= 1
 
 
 def HumanVsAI():
@@ -69,6 +173,7 @@ def HumanVsAI():
 
         joc.piese_tabla = urmatoarea_stare.piese_tabla
 
+
     try:
         # in prima faza a jocului, fiecare jucator isi pozitioneaza cele 9 piese
         print("Jucatorii trebuie sa isi plaseze piesele pe tabla")
@@ -79,7 +184,10 @@ def HumanVsAI():
                 jucator *= -1
             elif jucator == joc.JMAX and not joc.end:
                 print('-------- 2st PLAYER TURN --------')
-                ai_pune_piesa()
+                if main_engine == "Reinforcement Learning":
+                    RL_pune_piesa(i, joc, jucator)
+                else:
+                    ai_pune_piesa()
                 jucator *= -1
             print(joc)
         if not joc.end:
@@ -106,7 +214,10 @@ def HumanVsAI():
             elif jucator == joc.JMAX:
                 print('-------- 2st PLAYER TURN --------')
                 # print(str(joc))
-                ai_muta_piesa()
+                if main_engine == "Reinforcement Learning":
+                    RL_muta_piesa(-1, joc, jucator)
+                else:
+                    ai_muta_piesa()
                 jmax_win = joc.check_castigator(joc.JMAX)
                 # print(f"jmax_win_check:{jmax_win}")  # DEBUG
                 if jmax_win:
@@ -123,6 +234,8 @@ def HumanVsAI():
     except KeyboardInterrupt:
         print("human_vs_ai interrupted")
         pygame.quit()
+
+
 
 
 def HumanVsHuman():
@@ -630,7 +743,7 @@ class PyWindow:
         return [[sg.Text("You can set the engine settings or it will use the default ones")],
                 [sg.Frame("MAIN - AI",
                 [[sg.Frame("Select the engine ai will use",
-                 [[sg.Combo(["Alpha-Beta", "Min-Max"], default_value="Alpha-Beta", key="-AI-MAIN-ALGORITHM-")]])],
+                 [[sg.Combo(["Alpha-Beta", "Min-Max", "Reinforcement Learning"], default_value="Reinforcement Learning", key="-AI-MAIN-ALGORITHM-")]])],
                 [sg.Frame("Select the heuristic ai will use",
                  [[sg.Combo(["Last move is morris",
                              "Number of closed morrises",
