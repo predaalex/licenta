@@ -128,8 +128,8 @@ class StareJoc:
         self.culoare_jucator2 = None
         self.culoare_jucator1 = None
         self.piese_tabla = None
-        self.JMAX_num_piese = None
-        self.JMIN_num_piese = None
+        self.JMAX_num_piese = 0
+        self.JMIN_num_piese = 0
         self.JMIN = -1
         self.JMAX = 1
         self.window = None
@@ -143,7 +143,7 @@ class StareJoc:
             # Initializare camera
             self.video_image = cv.VideoCapture(0)  # 0 - fol camera defaul t | aceasta imagine va fi aliniata
             # importam modelul de clasificare
-            self.model = load("model_clasificare_piesa.joblib")
+            self.model = load("my_ai/model_clasificare_piesa.joblib")
             self.resnet_model = models.resnet18(pretrained=True)
             self.layer = self.resnet_model._modules.get('avgpool')
             self.resnet_model.eval()
@@ -161,8 +161,8 @@ class StareJoc:
         else:
             self.piese_tabla = tabla
         # self.piese_tabla = np.random.choice([-1, 0, 1], size=24)  # date de test random
-        self.JMIN_num_piese = 9  # numarul de piese al jucatorului
-        self.JMAX_num_piese = 9
+        self.JMIN_num_piese = 0  # numarul de piese al jucatorului
+        self.JMAX_num_piese = 0
 
     def init_GUI(self):
         # Facem threadul care tine tabla updatata
@@ -265,170 +265,14 @@ class StareJoc:
                          width=grosimea_liniei)
 
     def afisare_tabla(self):
-        result = ""
-        # consideram X jucatorul 1 si 0 jucatorul 2
+        return "".join([str(int(self.piese_tabla[0])) + "--" + str(int(self.piese_tabla[1])) + "--" + str(int(self.piese_tabla[2])) + "\n" +
+         "|" + str(int(self.piese_tabla[3])) + "-" + str(int(self.piese_tabla[4])) + "-" + str(int(self.piese_tabla[5])) + "|\n" +
+         "||" + str(int(self.piese_tabla[6])) + str(int(self.piese_tabla[7])) + str(int(self.piese_tabla[8])) + "||\n" +
+         str(int(self.piese_tabla[9])) + str(int(self.piese_tabla[10])) + str(int(self.piese_tabla[11])) + " " + str(int(self.piese_tabla[12])) + str(int(self.piese_tabla[13])) + str(int(self.piese_tabla[14])) + "\n" +
+         "||" + str(int(self.piese_tabla[15])) + str(int(self.piese_tabla[16])) + str(int(self.piese_tabla[17])) + "||\n" +
+         "|" + str(int(self.piese_tabla[18])) + "-" + str(int(self.piese_tabla[19])) + "-" + str(int(self.piese_tabla[20])) + "|\n" +
+         str(int(self.piese_tabla[21])) + "--" + str(int(self.piese_tabla[22])) + "--" + str(int(self.piese_tabla[23])) + "\n"])
 
-        # linia 1
-        result += str(self.piese_tabla[0])
-        for i in range(5):
-            result += "-"
-        result += str(self.piese_tabla[1])
-        for i in range(5):
-            result += "-"
-        result += str(self.piese_tabla[2])
-        result += "\n"
-
-        # linia 2
-        for i in range(13):
-            if i in (0, 6, 12):
-                result += "|"
-            else:
-                result += " "
-        result += "\n"
-
-        # linia 3
-        result += "|"
-        result += " "
-        result += str(self.piese_tabla[3])
-        for i in range(3):
-            result += "-"
-        result += str(self.piese_tabla[4])
-        for i in range(3):
-            result += "-"
-        result += str(self.piese_tabla[5])
-        result += " "
-        result += "|"
-        result += "\n"
-
-        # linia 4
-        result += "|"
-        result += " "
-        result += "|"
-        for i in range(3):
-            result += " "
-        result += "|"
-        for i in range(3):
-            result += " "
-        result += "|"
-        result += " "
-        result += "|"
-        result += "\n"
-
-        # linia 5
-        result += "|"
-        result += " "
-        result += "|"
-        result += " "
-        result += str(self.piese_tabla[6])
-        result += "-"
-        result += str(self.piese_tabla[7])
-        result += "-"
-        result += str(self.piese_tabla[8])
-        result += " "
-        result += "|"
-        result += " "
-        result += "|"
-        result += "\n"
-
-        # linia 6
-        for i in range(3):
-            result += "| "
-        for i in range(2):
-            result += " "
-        result += "|"
-        for i in range(2):
-            result += " |"
-        result += "\n"
-
-        # linia 7
-        result += str(self.piese_tabla[9])
-        result += "-"
-        result += str(self.piese_tabla[10])
-        result += "-"
-        result += str(self.piese_tabla[11])
-        for i in range(3):
-            result += " "
-        result += str(self.piese_tabla[12])
-        result += "-"
-        result += str(self.piese_tabla[13])
-        result += "-"
-        result += str(self.piese_tabla[14])
-        result += "\n"
-
-        # linia 8
-        for i in range(2):
-            result += "| "
-        result += "|"
-        for i in range(3):
-            result += " "
-        result += "|"
-        for i in range(2):
-            result += " |"
-        result += "\n"
-
-        # linia 9
-        result += "|"
-        result += " "
-        result += "|"
-        result += " "
-        result += str(self.piese_tabla[15])
-        result += "-"
-        result += str(self.piese_tabla[16])
-        result += "-"
-        result += str(self.piese_tabla[17])
-        result += " "
-        result += "|"
-        result += " "
-        result += "|"
-        result += "\n"
-
-        # linia 10
-        result += "|"
-        result += " "
-        result += "|"
-        for i in range(3):
-            result += " "
-        result += "|"
-        for i in range(3):
-            result += " "
-        result += "|"
-        result += " "
-        result += "|"
-        result += "\n"
-
-        # linia 11
-        result += "|"
-        result += " "
-        result += str(self.piese_tabla[18])
-        for i in range(3):
-            result += "-"
-        result += str(self.piese_tabla[19])
-        for i in range(3):
-            result += "-"
-        result += str(self.piese_tabla[20])
-        result += " "
-        result += "|"
-        result += "\n"
-
-        # linia 12
-        for i in range(13):
-            if i in (0, 6, 12):
-                result += "|"
-            else:
-                result += " "
-        result += "\n"
-
-        # linia 13
-        result += str(self.piese_tabla[21])
-        for i in range(5):
-            result += "-"
-        result += str(self.piese_tabla[22])
-        for i in range(5):
-            result += "-"
-        result += str(self.piese_tabla[23])
-        result += "\n"
-
-        return result
 
     def get_pos_tabla_from_click(self):
         global x_click, y_click, game_event, coord_arr
@@ -509,6 +353,11 @@ class StareJoc:
         else:
             self.piese_tabla[index_pos] = jucator
             print("Piesa a fost pusa cu succes")
+
+            if jucator == self.JMIN:
+                self.JMIN_num_piese += 1
+            elif jucator == self.JMAX:
+                self.JMAX_num_piese += 1
 
             # verificam daca piesa pusa formeaza o moara
             if self.check_moara(index_pos, jucator):
@@ -723,7 +572,7 @@ class StareJoc:
             scor += 43 * self.scor_closed_morrises(jucator)
             scor += 10 * self.scor_blocked_pieces(jucator)
             scor += 8 * self.scor_double_morris(enemy_pieces_in_morris, player_prices_in_morris)
-            scor += 1086 * self.scor_winning_configuration(jucator)
+            scor += 1000 * self.scor_winning_configuration(jucator)
             return scor
     def scor_blocked_pieces(self, jucator):
         player_blocked_pieces = 0
@@ -882,6 +731,7 @@ class StareJoc:
              img_aliniata[210:260, 93:143, :], img_aliniata[210:260, 150:200, :], img_aliniata[210:260, 215:265, :],
              img_aliniata[255:305, 50:100, :], img_aliniata[255:305, 150:200, :], img_aliniata[255:305, 250:300, :],
              img_aliniata[300:350, 0:50, :], img_aliniata[300:350, 150:200, :], img_aliniata[300:350, 300:350, :]]
+
         configuratie_camera = []
         for img in lista_imagini_pozitii:
             label = self.model.predict(self.image_to_resnet_descriptors(img))

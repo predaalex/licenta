@@ -33,7 +33,7 @@ def ai_muta_piesa():
         #     print("ai-ul a facut o moara")  # DEBUG
         joc.JMIN_num_piese -= 1
 
-        urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+        # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
     joc.piese_tabla = urmatoarea_stare.piese_tabla
     print("ai-ul a mutat o piesa")
 
@@ -67,7 +67,7 @@ def ai_pune_piesa():
         #     print("ai-ul a facut o moara")  # DEBUG
         joc.JMIN_num_piese -= 1
 
-        urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
+        # urmatoarea_stare = traditional_ai.indepartare_piesa(urmatoarea_stare, jucator)
     joc.piese_tabla = urmatoarea_stare.piese_tabla
 
 

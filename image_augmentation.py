@@ -82,9 +82,9 @@ img_template = cv.resize(img_template, (350, 350))
 # cv.waitKey(0)
 # cv.destroyAllWindows()
 
-index_piese_verzi = 49
-index_piese_portocalii = 51
-index_pozitii_libere = 47
+index_piese_verzi = 0
+index_piese_portocalii = 0
+index_pozitii_libere = 0
 
 # verific daca camera s-a deschis cu succes
 if not video_image.isOpened():
@@ -130,21 +130,22 @@ while True:
                                  img_aliniata[255:305, 50:100, :], img_aliniata[255:305, 150:200, :], img_aliniata[255:305, 250:300, :],
                                  img_aliniata[300:350, 0:50, :], img_aliniata[300:350, 150:200, :], img_aliniata[300:350, 300:350, :]]
         # DEBUG (vizualizare piese)
+        save_path = "resources/img/"
         for index, img in enumerate(lista_imagini_pozitii):
             print(f"{index + 1} -> {img.shape}")
             cv.imshow(str(index + 1), img)
             key = cv.waitKey(0) & 0xFF
             if key == ord('1'):
                 print("1")
-                cv.imwrite("resources/test/piese_verzi/" + str(index_piese_verzi) + ".jpg", img)
+                cv.imwrite(save_path + str(index_piese_verzi) + ".jpg", img)
                 index_piese_verzi += 1
             elif key == ord('2'):
                 print("2")
-                cv.imwrite("resources/test/piese_portocalii/" + str(index_piese_portocalii) + ".jpg", img)
+                cv.imwrite(save_path + str(index_piese_portocalii) + ".jpg", img)
                 index_piese_portocalii += 1
             elif key == ord('3'):
                 print("3")
-                cv.imwrite("resources/test/pozitii_libere/" + str(index_pozitii_libere) + ".jpg", img)
+                cv.imwrite(save_path + str(index_pozitii_libere) + ".jpg", img)
                 index_pozitii_libere += 1
             else:
                 print("tasta gresita")
