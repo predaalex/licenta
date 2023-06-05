@@ -38,9 +38,11 @@ def convert_stare_to_net_input(stare_joc: board.StareJoc, mutare_faza1, jucator)
         mob = stare_joc.JMIN_num_piese
         eob = stare_joc.JMAX_num_piese
         moh = 9 - int(mutare_faza1 / 2)
-        eoh = moh + 1
+        eoh = moh
         if mutare_faza1 == -1:
             moh = eoh = 0
+
+    print(f" moh{moh}  eoh{eoh}  mob{mob}  eob{eob}")
 
     net_input += str(moh)
     net_input += str(eoh)
@@ -63,7 +65,7 @@ def request_retea(stare, jucator):
     # Let's send data through UDP protocol
     # while True:
     s.sendto(stare.encode(), (ip, port))
-    print("1. Client Sent : ", stare)
+    print("1. Client Sent : ", stare , " -> ", len(stare))
     data, address = s.recvfrom(4096)
     print("2. Client received : ", data.decode())
     # close the socket
@@ -83,7 +85,10 @@ def RL_pune_piesa(i, joc, jucator):
 
     print("RL a pus o piesa")
 
-    joc.JMAX_num_piese += 1
+    if jucator == joc.JMAX:
+        joc.JMAX_num_piese += 1
+    elif jucator == joc.JMIN:
+        joc.JMIN_num_piese += 1
 
     if joc.check_moara(to, jucator):
         print("RL a facut o moara")
@@ -101,9 +106,7 @@ def RL_muta_piesa(i, joc, jucator):
     joc.piese_tabla[fromm] = 0
     joc.piese_tabla[to] = jucator
 
-    print("RL a pus o piesa")
-
-    joc.JMAX_num_piese += 1
+    print("RL a mutat o piesa")
 
     if joc.check_moara(to, jucator):
         print("RL a facut o moara")
@@ -234,8 +237,6 @@ def HumanVsAI():
     except KeyboardInterrupt:
         print("human_vs_ai interrupted")
         pygame.quit()
-
-
 
 
 def HumanVsHuman():
@@ -428,11 +429,17 @@ def AIVsAI():
         for i in range(18):
             if jucator == joc.JMIN and not joc.end:
                 print('-------- 1st PLAYER TURN --------')
-                ai1_pune_piesa()
+                if main_engine == "Reinforcement Learning":
+                    RL_pune_piesa(i, joc, jucator)
+                else:
+                    ai1_pune_piesa()
                 jucator *= -1
             elif jucator == joc.JMAX and not joc.end:
                 print('-------- 2st PLAYER TURN --------')
-                ai2_pune_piesa()
+                if second_engine == "Reinforcement Learning":
+                    RL_pune_piesa(i, joc, jucator)
+                else:
+                    ai2_pune_piesa()
                 jucator *= -1
         if not joc.end:
             print("Jucatorii trebuie sa isi mute piesele pe tabla")
@@ -449,7 +456,10 @@ def AIVsAI():
                         break
                     first_move = False
                 print('-------- 1st PLAYER TURN --------')
-                ai1_muta_piesa()
+                if main_engine == "Reinforcement Learning":
+                    RL_muta_piesa(-1, joc, jucator)
+                else:
+                    ai1_muta_piesa()
                 numar_mutari += 1
 
                 jmin_win = joc.check_castigator(joc.JMIN)
@@ -461,7 +471,10 @@ def AIVsAI():
             elif jucator == joc.JMAX:
                 print('-------- 2st PLAYER TURN --------')
 
-                ai2_muta_piesa()
+                if second_engine == "Reinforcement Learning":
+                    RL_muta_piesa(-1, joc, jucator)
+                else:
+                    ai2_muta_piesa()
                 numar_mutari += 1
 
 
@@ -655,7 +668,10 @@ def HumanVsAI_Camera():
                 jucator *= -1
             elif jucator == joc.JMAX and not joc.end:
                 print('-------- 2st PLAYER TURN --------')
-                ai_pune_piesa()
+                if main_engine == "Reinforcement Learning":
+                    RL_pune_piesa(i, joc, jucator)
+                else:
+                    ai_pune_piesa()
                 jucator *= -1
         if not joc.end:
             print("Jucatorii trebuie sa isi mute piesele pe tabla")
@@ -681,7 +697,10 @@ def HumanVsAI_Camera():
             elif jucator == joc.JMAX:
                 print('-------- 2st PLAYER TURN --------')
 
-                ai_muta_piesa()
+                if main_engine == "Reinforcement Learning":
+                    RL_muta_piesa(-1, joc, jucator)
+                else:
+                    ai_muta_piesa()
                 jmax_win = joc.check_castigator(joc.JMAX)
                 if jmax_win:
                     break
@@ -761,7 +780,7 @@ class PyWindow:
                    sg.Slider(range=(1, 21), key="--AI-MAIN-DEPTH_MOVE-", orientation='v', size=(5, 20), default_value=3)]])]])],
                 [sg.Frame("SECOND - AI",
                           [[sg.Frame("Select the engine ai will use",
-                                     [[sg.Combo(["Alpha-Beta", "Min-Max"], default_value="Alpha-Beta",
+                                     [[sg.Combo(["Alpha-Beta", "Min-Max", "Reinforcement Learning"], default_value="Reinforcement Learning",
                                                 key="-AI-SECOND-ALGORITHM-")]])],
                            [sg.Frame("Select the heuristic ai will use",
                                      [[sg.Combo(["Last move is morris",
