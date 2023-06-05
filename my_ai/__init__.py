@@ -81,6 +81,7 @@ def HumanVsAI():
                 print('-------- 2st PLAYER TURN --------')
                 ai_pune_piesa()
                 jucator *= -1
+            print(joc)
         if not joc.end:
             print("Jucatorii trebuie sa isi mute piesele pe tabla")
         # in a doua faza a jocului, cei doi jucatori muta piesele pana cand unul dintre ei castiga
@@ -111,6 +112,7 @@ def HumanVsAI():
                 if jmax_win:
                     break
                 jucator *= -1
+            print(joc)
         if jmin_win:
             print('--------- 1st PLAYER WON ------------')
         elif jmax_win:
