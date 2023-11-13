@@ -6,7 +6,7 @@ MAX_MATCHES = 1000
 GOOD_MATCH_PERCENT = 0.7
 
 
-def alignImages(im1, im2):
+def alignImages(im1, im2, str):
     # Convert images to grayscale
     im1Gray = cv.cvtColor(im1, cv.COLOR_BGR2GRAY)
     im2Gray = cv.cvtColor(im2, cv.COLOR_BGR2GRAY)
@@ -43,7 +43,7 @@ def alignImages(im1, im2):
 
     # Draw top matches
     imMatches = cv.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
-    cv.imshow("matches", imMatches)
+    cv.imshow(f"matches{str}", imMatches)
     # cv.imwrite("matches.jpg", imMatches)
 
     # Extract location of good matches
@@ -66,24 +66,22 @@ def alignImages(im1, im2):
         height, width, channels = im2.shape
         im1Reg = cv.warpPerspective(im1, h, (width, height))
 
-        return im1Reg, h
+        return im1Reg, len(matches)
     else:
         print("no keypoints matching")
         return im1, 0
 
 
-
 video_image = cv.VideoCapture(0)  # 0 - fol camera default | aceasta imagine va fi aliniata
-referinta_fisier_template = "resources/template_test3.jpg"  # imagine dupa care va fi aliniata imagine camerei
-img_template = cv.imread(referinta_fisier_template, cv.IMREAD_COLOR)
-img_template = cv.resize(img_template, (350, 350))
-# cv.imshow("imRef", imRef)
-# cv.waitKey(0)
-# cv.destroyAllWindows()
+referinta_fisier_template = 'resources/template1.jpg'
+referinta_fisier_template2 = 'resources/template2.jpg'
 
-index_piese_verzi = 49
-index_piese_portocalii = 51
-index_pozitii_libere = 47
+# imagine dupa care va fi aliniata imagine camerei
+img_template = cv.imread(referinta_fisier_template, cv.IMREAD_COLOR)
+img_template = cv.resize(img_template, None, fx=0.5, fy=0.5)
+
+img_template2 = cv.imread(referinta_fisier_template2, cv.IMREAD_COLOR)
+img_template2 = cv.resize(img_template2, None, fx=0.5, fy=0.5)
 
 # verific daca camera s-a deschis cu succes
 if not video_image.isOpened():
@@ -97,45 +95,39 @@ while True:
     fps += 1
     success, camera = video_image.read()
     cv.imshow("video", camera)
-    img_aliniata = None
+    img_aliniata1 = None
+    img_aliniata2 = None
 
     try:
-        img_aliniata, h = alignImages(camera, img_template)
-        cv.imshow("img aliniata", img_aliniata)
-    except:
-        print("A avut loc o eroare la alinierea tablei")
+        img_aliniata1, nr_matches1 = alignImages(camera, img_template, "1")
+        # mse1 = np.mean((img_template - img_aliniata1) ** 2)
+        # print(f"mse1 = {mse1}")
+        print(f"nr_matches1 = {nr_matches1}")
 
-    # low_color_player1 = (0, 50, 114)
-    # high_color_player1 = (31, 255, 255)
-    # img_hsv = cv.cvtColor(img_aliniata, cv.COLOR_BGR2HSV)
-    # img_filtrata = cv.inRange(img_hsv, low_color_player1, high_color_player1)
-    # cv.imshow("img_filtrata", img_filtrata)
+        img_aliniata2, nr_matches2 = alignImages(camera, img_template2, "2")
+        # mse2 = np.mean((img_template2 - img_aliniata2) ** 2)
+        # print(f"mse2 = {mse2}")
+        print(f"nr_matches2 = {nr_matches2}")
+
+        cv.imshow("img aliniata", img_aliniata1)
+        cv.imshow("img aliniata2", img_aliniata2)
+
+        if nr_matches1 > nr_matches2:
+            cv.imshow("THE CHOSEN ONE", img_aliniata1)
+            print(1)
+        else:
+            print(2)
+            cv.imshow("THE CHOSEN ONE", img_aliniata2)
+
+        print("=============")
+
+    except:
+        print("A avut loc o eroare la alinierea imaginii")
 
     # asteptam ca o tasta sa fie apasata
-    key = cv.waitKey(1) & 0xFF
+    key = cv.waitKey(0) & 0xFF
 
-    # verific daca space-ul este apasat pentru a detecta configuratia tablei
-    if key == 32 and img_aliniata is not None:
-        # Save the captured frame as a screenshot
-        # print("Screenshot saved.")
-
-        lista_imagini_pozitii = [img_aliniata[0:50, 0:50, :], img_aliniata[0:50, 150:200, :], img_aliniata[0:50, 300:350, :],
-                                 img_aliniata[45:95, 45:95, :], img_aliniata[45:95, 150:200, :], img_aliniata[45:95, 250:300, :],
-                                 img_aliniata[90:140, 93:143, :], img_aliniata[90:140, 150:200, :], img_aliniata[90:140, 215:265, :],
-                                 img_aliniata[150:200, 0:50, :], img_aliniata[150:200, 50:100, :], img_aliniata[150:200, 90:140, :],
-                                 img_aliniata[150:200, 215:265, :], img_aliniata[150:200, 255:305, :], img_aliniata[145:200, 300:350, :],
-                                 img_aliniata[210:260, 93:143, :], img_aliniata[210:260, 150:200, :], img_aliniata[210:260, 215:265, :],
-                                 img_aliniata[255:305, 50:100, :], img_aliniata[255:305, 150:200, :], img_aliniata[255:305, 250:300, :],
-                                 img_aliniata[300:350, 0:50, :], img_aliniata[300:350, 150:200, :], img_aliniata[300:350, 300:350, :]]
-        # DEBUG (vizualizare piese)
-        for index, img in enumerate(lista_imagini_pozitii):
-            print(f"{index + 1} -> {img.shape}")
-            cv.imshow(str(index + 1), img)
-
-
-
-    # verific daca q-ul este apasat pentru a iesi din loop
-    elif key == ord('q'):
+    if key == ord('q'):
         break
 
     # tin cont de numarul de fps-uri al imaginii
